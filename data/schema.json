@@ -1,0 +1,17 @@
+{
+  "event": {
+    "id": "string (unique identifier)",
+    "title": "string (event name)",
+    "type": "string (workshop|meetup|lecture|seminar|party|social|networking|other)",
+    "description": "string (event description)",
+    "date": "string (ISO 8601 format or relative date)",
+    "time": "string (start time)",
+    "location": "string (venue/building)",
+    "organizer": "string (arc|library|club|founders|makerspace|unsw|other)",
+    "club_name": "string (if organized by a club)",
+    "tags": ["array of strings (keywords/topics)"],
+    "registration_link": "string (URL for tickets/registration)",
+    "capacity": "number (optional)",
+    "cost": "string (free|$X|members free)"
+  }
+}

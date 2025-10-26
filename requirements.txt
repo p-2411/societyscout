@@ -1,0 +1,11 @@
+# Society Scout Dependencies
+# Python 3.8+
+
+# No external dependencies required for basic functionality
+# All modules use Python standard library
+
+# Future dependencies (when implementing advanced features):
+# numpy>=1.21.0
+# scikit-learn>=0.24.0  # For ML-based intent detection
+# flask>=2.0.0          # For web interface
+# pytest>=7.0.0         # For testing
