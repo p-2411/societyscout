@@ -129,3 +129,65 @@ class FallbackHandler:
                 "1. Clear just your most recent filter\n"
                 "2. Restart the entire conversation\n"
                 "Please type '1' or '2'")
+
+    @staticmethod
+    def request_specific_filters(filters):
+        """
+        Generate a targeted prompt based on what filters are present vs. missing
+
+        Args:
+            filters: Dictionary of current filters
+
+        Returns:
+            str: Specific prompt asking for missing information
+        """
+        # Identify what we have
+        has_items = []
+        if filters.get('date'):
+            has_items.append(f"events in {filters['date']}")
+        if filters.get('event_type'):
+            has_items.append(f"{filters['event_type']} events")
+        if filters.get('organizer'):
+            has_items.append(f"events by {filters['organizer']}")
+        if filters.get('location'):
+            has_items.append(f"events at {filters['location']}")
+        if filters.get('keywords'):
+            has_items.append(f"events about {', '.join(filters['keywords'])}")
+
+        # Build acknowledgment
+        if has_items:
+            acknowledgment = f"I see you're looking for {' '.join(has_items)}. "
+        else:
+            acknowledgment = "I'd be happy to help you find events! "
+
+        # Determine what to ask for (prioritize in order: event type, date, then other)
+        missing_prompts = []
+
+        if not filters.get('event_type'):
+            missing_prompts.append({
+                'question': 'What type of event are you interested in?',
+                'examples': 'workshop, meetup, lecture, seminar, party, social, networking'
+            })
+
+        if not filters.get('date'):
+            missing_prompts.append({
+                'question': 'When would you like to attend?',
+                'examples': 'today, tomorrow, this week, next week'
+            })
+
+        if not filters.get('organizer') and not filters.get('location'):
+            missing_prompts.append({
+                'question': 'Any preference for organizer or location?',
+                'examples': 'Arc, Library, Clubs, Founders, Makerspace, or a specific location'
+            })
+
+        # If we have nothing specific to ask, use generic prompt
+        if not missing_prompts:
+            return acknowledgment + "Let me search for events matching your criteria."
+
+        # Ask for the first missing piece
+        prompt = missing_prompts[0]
+        response = acknowledgment + prompt['question']
+        response += f"\n\nFor example: {prompt['examples']}"
+
+        return response

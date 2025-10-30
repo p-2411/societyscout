@@ -108,9 +108,9 @@ class ConversationManager:
                 # No results found - use fallback
                 return self._handle_no_results()
         else:
-            # Ask for clarification
+            # Ask for specific missing information
             self.state = 'awaiting_clarification'
-            return "Of course, I can search for events. Do you have anything specific in mind?"
+            return self.fallbacks.request_specific_filters(filters)
 
     def _handle_event_details(self, user_input):
         """Handle request for event details"""

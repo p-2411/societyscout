@@ -3,8 +3,7 @@ Chatbot Rules Module
 Implements conversation flow rules and input normalization
 """
 
-import re
-from datetime import datetime
+import string
 
 class ChatbotRules:
     """Handles rule-based conversation logic"""
@@ -13,6 +12,9 @@ class ChatbotRules:
     EVENT_TYPES = ['workshop', 'meetup', 'lecture', 'seminar', 'party', 'social', 'networking']
     ORGANIZERS = ['arc', 'library', 'club', 'clubs', 'founders', 'makerspace', 'unsw']
     FILLER_WORDS = ['the', 'a', 'an', 'uh', 'um', 'like', 'just']
+    SEARCH_WORDS = ['find', 'search', 'looking', 'show', 'events', 'event', 'for', 'me',
+                    'im', 'i', 'tryna', 'trying', 'want', 'need', 'get', 'any', 'some']
+    DATE_WORDS = ['today', 'tomorrow', 'week', 'next', 'this', 'day', 'days']
 
     @staticmethod
     def normalize_input(user_input):
@@ -28,6 +30,9 @@ class ChatbotRules:
         # Convert to lowercase
         text = user_input.lower().strip()
 
+        # Remove punctuation
+        text = text.translate(str.maketrans('', '', string.punctuation))
+
         # Remove filler words
         words = text.split()
         filtered_words = [w for w in words if w not in ChatbotRules.FILLER_WORDS]
@@ -41,7 +46,7 @@ class ChatbotRules:
             'keywords': []
         }
 
-        # Check for event types
+        # Check for event types 
         for word in filtered_words:
             if word in ChatbotRules.EVENT_TYPES:
                 filters['event_type'] = word
@@ -53,21 +58,26 @@ class ChatbotRules:
 
         # Extract date keywords
         if 'today' in text:
-            filters['date'] = 'today'
+            filters['date'] = '0 days'
         elif 'tomorrow' in text:
-            filters['date'] = 'tomorrow'
+            filters['date'] = '1 days'
         elif 'week' in text:
             if 'next' in text:
-                filters['date'] = 'next_week'
+                filters['date'] = '1 weeks'
             elif 'this' in text:
-                filters['date'] = 'this_week'
+                filters['date'] = '0 weeks'
+        elif 'day' or 'days' in text:
+            for word in words:
+                if (word.isdigit()):
+                    filters['date'] = word + " days"
 
-        # Store remaining keywords
+        # Store remaining keywords (exclude all common/filler words)
         filters['keywords'] = [w for w in filtered_words
                                if w not in ChatbotRules.EVENT_TYPES
                                and w not in ChatbotRules.ORGANIZERS
-                               and w not in ['today', 'tomorrow', 'week', 'next', 'this']]
-
+                               and w not in ChatbotRules.DATE_WORDS
+                               and w not in ChatbotRules.SEARCH_WORDS
+                               and not w.isdigit()]  # Also exclude numbers
         return filters
 
     @staticmethod
@@ -111,6 +121,7 @@ class ChatbotRules:
     def is_specific_search(filters):
         """
         Check if user provided specific search criteria
+        Requires at least event_type OR at least 2 other filters to be considered specific
 
         Args:
             filters: Normalized filters dict
@@ -118,10 +129,16 @@ class ChatbotRules:
         Returns:
             bool: True if search has specific criteria
         """
-        return any([
-            filters['event_type'],
-            filters['date'],
-            filters['location'],
-            filters['organizer'],
-            len(filters['keywords']) > 0
+        # Count non-empty filters
+        filter_count = sum([
+            1 if filters['event_type'] else 0,
+            1 if filters['date'] else 0,
+            1 if filters['location'] else 0,
+            1 if filters['organizer'] else 0,
+            1 if len(filters['keywords']) > 0 else 0
         ])
+
+        # Consider specific if:
+        # 1. Has event_type (most important filter), OR
+        # 2. Has at least 2 other filters (e.g., date + location, or date + organizer, etc.)
+        return filters['event_type'] is not None or filter_count >= 2
