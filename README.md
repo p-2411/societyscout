@@ -119,11 +119,3 @@ Based on surveys with 28 UNSW students:
 ## Contributing
 
 This is a university course project. Team members follow the Gantt chart for task allocation and deadlines.
-
-## License
-
-Educational project for DESN1000 at UNSW Sydney.
-
-## Contact
-
-For questions or feedback, please contact team members through the university portal.
