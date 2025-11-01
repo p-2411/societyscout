@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 class EventDatabase:
     """Manages the events database"""
 
-    def __init__(self, data_file='data/events.json'):
+    def __init__(self, data_file='./data/events.json'):
         self.data_file = data_file
         self.events = []
         self.load_events()
@@ -59,8 +59,8 @@ class EventDatabase:
             elif filter_type == 'location':
                 results = [e for e in results if filter_value in e['location'].lower()]
 
-            elif filter_type == 'keyword':
-                results = self._filter_by_keyword(results, filter_value)
+            # elif filter_type == 'keyword':
+            #     results = self._filter_by_keyword(results, filter_value)
 
         return results
 
@@ -90,13 +90,13 @@ class EventDatabase:
         return [e for e in events
                 if datetime.fromisoformat(e['date']).date() == target_date]
 
-    def _filter_by_keyword(self, events, keyword):
-        """Filter events by keyword (searches title, description, and tags)"""
-        return [e for e in events if (
-            keyword in e['title'].lower() or
-            keyword in e['description'].lower() or
-            any(keyword in tag.lower() for tag in e.get('tags', []))
-        )]
+    # def _filter_by_keyword(self, events, keyword):
+    #     """Filter events by keyword (searches title, description, and tags)"""
+    #     return [e for e in events if (
+    #         keyword in e['title'].lower() or
+    #         keyword in e['description'].lower() or
+    #         any(keyword in tag.lower() for tag in e.get('tags', []))
+    #     )]
 
     def get_event_by_id(self, event_id):
         """Get a specific event by ID"""
