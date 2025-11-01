@@ -93,29 +93,31 @@ class ChatbotRules:
         """
         text = user_input.lower().strip()
 
+        intents = []
         # Greeting detection
         greetings = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon']
         if any(greeting in text for greeting in greetings):
-            return 'greeting'
+            intents.append('greeting')
 
         # Cancel/undo commands
         if text in ['cancel', 'undo', 'back']:
-            return 'cancel'
+            intents.append('cancel')
 
         # Reset commands
         if text in ['reset', 'restart', 'clear', 'start over']:
-            return 'reset'
+            intents.append('reset')
 
         # Event search
         search_keywords = ['find', 'search', 'looking for', 'show me', 'events', 'what']
         if any(keyword in text for keyword in search_keywords):
-            return 'find_event'
-
+            print("Intent: " + 'find_event')
+            intents.append('find_event')
+        
         # Event details
         if any(word in text for word in ['details', 'more info', 'tell me more', 'about']):
-            return 'get_details'
+            intents.append('get_details')
 
-        return 'unknown'
+        return intents
 
     @staticmethod
     def is_specific_search(filters):

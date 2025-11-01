@@ -32,20 +32,20 @@ class ConversationManager:
 
         # Detect intent
         intent = self.rules.detect_intent(user_input)
-
+        response = ""
         # Route to appropriate handler
-        if intent == 'greeting':
-            response = self._handle_greeting()
-        elif intent == 'cancel':
-            response = self._handle_cancel()
-        elif intent == 'reset':
-            response = self._handle_reset()
-        elif intent == 'find_event':
-            response = self._handle_event_search(user_input)
-        elif intent == 'get_details':
-            response = self._handle_event_details(user_input)
-        else:
-            response = self._handle_unknown(user_input)
+        if 'greeting' in intent :
+            response += self._handle_greeting(intent)
+        if 'cancel' in intent:
+            response += self._handle_cancel()
+        if 'reset' in intent:
+            response += self._handle_reset()
+        if  'find_event' in intent:
+            response += self._handle_event_search(user_input)
+        if  'get_details' in intent:
+            response += self._handle_event_details(user_input)
+        if len(response) == 0:
+            response += self._handle_unknown(user_input)
 
         # Store bot response in history
         self.memory.add_to_history('bot', response)
