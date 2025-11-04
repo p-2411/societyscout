@@ -40,10 +40,8 @@ Society Scout is a chatbot that centralizes all UNSW events in one place, allowi
 
 ## Technology Stack
 
-- Python 3.x
-- Natural Language Processing
+- Python 3
 - Event Database (JSON)
-- Conversational AI Framework
 
 ## Project Structure
 
@@ -83,7 +81,7 @@ python main.py
 ## Chatbot Design Principles
 
 ### System Design Rules
-1. **No Interruptions**: Chat box greyed out while bot is responding
+1. **No Interruptions**: User is not able to respond while chatbot is responding.
 2. **Grounding**: Provide feedback every time progress is made
 3. **Memory Management**: Store keywords from user requests and bot confirmations
 
