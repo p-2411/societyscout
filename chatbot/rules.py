@@ -11,10 +11,86 @@ class ChatbotRules:
     # Keywords for different filter types
     EVENT_TYPES = ['workshop', 'meetup', 'lecture', 'seminar', 'party', 'social', 'networking']
     ORGANIZERS = ['arc', 'library', 'club', 'clubs', 'founders', 'makerspace', 'unsw']
-    FILLER_WORDS = ['the', 'a', 'an', 'uh', 'um', 'like', 'just']
-    SEARCH_WORDS = ['find', 'search', 'looking', 'show', 'events', 'event', 'for', 'me',
-                    'im', 'i', 'tryna', 'trying', 'want', 'need', 'get', 'any', 'some']
-    DATE_WORDS = ['today', 'tomorrow', 'week', 'next', 'this', 'day', 'days']
+    FILLER_WORDS = [
+        # Articles
+        'the', 'a', 'an',
+        # Conversational fillers
+        'uh', 'uhm', 'um', 'er', 'ah', 'oh', 'hmm',
+        # Hedging words
+        'like', 'just', 'so', 'well', 'basically', 'actually', 'literally',
+        'seriously', 'really', 'very', 'pretty', 'kinda', 'sorta', 'kind', 'sort',
+        # Uncertainty
+        'maybe', 'probably', 'perhaps', 'possibly',
+        # Quantifiers (general)
+        'some', 'any', 'all', 'every', 'each',
+        # Demonstratives
+        'that', 'this', 'these', 'those', 'it', 'its',
+        # Common verbs
+        'is', 'are', 'was', 'were', 'be', 'been', 'being',
+        'have', 'has', 'had', 'having',
+        'do', 'does', 'did', 'doing', 'done',
+        # Modals
+        'will', 'would', 'could', 'should', 'shall',
+        'may', 'might', 'must', 'can', 'cant',
+        # Prepositions
+        'in', 'on', 'at', 'by', 'with', 'from', 'of', 'to', 'as',
+        # Pronouns
+        'i', 'me', 'my', 'mine', 'you', 'your', 'yours'
+    ]
+
+    SEARCH_WORDS = [
+        # Direct search terms
+        'find', 'search', 'locate', 'discover', 'browse', 'explore',
+        # Display/view terms
+        'show', 'see', 'check', 'list', 'view', 'display', 'pull', 'fetch',
+        # Question words
+        'whats', 'what', 'where', 'when', 'which', 'who',
+        # State verbs
+        'are', 'is', 'there', 'available', 'happening', 'going', 'on', 'around',
+        # Action verbs
+        'got', 'get', 'give', 'tell', 'suggest', 'recommend',
+        # Intent words
+        'looking', 'interested', 'want', 'need', 'like', 'love', 'prefer',
+        # Participation
+        'attend', 'join', 'participate', 'go', 'come',
+        # Casual expressions
+        'im', 'tryna', 'trying', 'wanna', 'gonna', 'gotta',
+        # Help/assistance
+        'help', 'assist', 'suggestions', 'recommendations', 'options', 'ideas',
+        # Generic words
+        'events', 'event', 'for', 'me', 'any', 'some', 'stuff', 'things',
+        'upcoming', 'future', 'new',
+        # Modals in search context
+        'can', 'could', 'would', 'should'
+    ]
+
+    DATE_WORDS = [
+        # Relative days
+        'today', 'tomorrow', 'yesterday', 'tonight',
+        # Day units
+        'day', 'days',
+        # Weeks
+        'week', 'weeks', 'weekend', 'weekday', 'weekdays',
+        # Months
+        'month', 'months',
+        # Years
+        'year', 'years',
+        # Temporal modifiers
+        'next', 'this', 'last', 'coming', 'past', 'previous',
+        'current', 'upcoming', 'future', 'recent',
+        # Days of week
+        'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+        'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun',
+        # Times of day
+        'morning', 'afternoon', 'evening', 'night', 'midday', 'noon', 'midnight',
+        # Time indicators
+        'now', 'soon', 'later', 'ago', 'before', 'after',
+        # Months
+        'january', 'february', 'march', 'april', 'may', 'june',
+        'july', 'august', 'september', 'october', 'november', 'december',
+        'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+        'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+    ]
 
     @staticmethod
     def normalize_input(user_input):
