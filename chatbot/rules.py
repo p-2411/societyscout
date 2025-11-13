@@ -93,6 +93,37 @@ class ChatbotRules:
     ]
 
     @staticmethod
+    def singularize(word):
+        """
+        Convert plural words to singular form
+
+        Args:
+            word: Word to singularize
+
+        Returns:
+            str: Singular form of the word
+        """
+        if len(word) <= 2:
+            return word
+
+        # Handle common plural patterns
+        if word.endswith('ies') and len(word) > 3:
+            # parties -> party, studies -> study
+            return word[:-3] + 'y'
+        elif word.endswith('ves'):
+            # lives -> life, knives -> knife
+            return word[:-3] + 'fe'
+        elif word.endswith('ses') and len(word) > 3:
+            # classes -> class, passes -> pass
+            return word[:-2]
+        elif word.endswith('s') and not word.endswith('ss'):
+            # workshops -> workshop, events -> event
+            # but not: class, pass, etc.
+            return word[:-1]
+
+        return word
+
+    @staticmethod
     def normalize_input(user_input):
         """
         Normalize user input by removing filler words and extracting key information
@@ -109,9 +140,9 @@ class ChatbotRules:
         # Remove punctuation
         text = text.translate(str.maketrans('', '', string.punctuation))
 
-        # Remove filler words
+        # Remove filler words and singularize
         words = text.split()
-        filtered_words = [w for w in words if w not in ChatbotRules.FILLER_WORDS]
+        filtered_words = [ChatbotRules.singularize(w) for w in words if w not in ChatbotRules.FILLER_WORDS]
 
         # Extract filters
         filters = {
@@ -167,12 +198,13 @@ class ChatbotRules:
         Returns:
             str: Intent type (greeting, find_event, get_details, cancel, reset, etc.)
         """
-        text = user_input.lower().strip()
+        text = user_input.lower().strip().split()
 
         # Greeting detection
         greetings = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon']
-        if any(greeting in text for greeting in greetings):
-            return 'greeting'
+        for word in text:
+            if word in greetings:
+                return 'greeting'
 
         # Cancel/undo commands
         if text in ['cancel', 'undo', 'back']:
@@ -183,13 +215,15 @@ class ChatbotRules:
             return 'reset'
 
         # Event search
-        search_keywords = ['find', 'search', 'looking for', 'show me', 'events', 'what']
-        if any(keyword in text for keyword in search_keywords):
-            return 'find_event'
-
+        search_keywords = ChatbotRules.SEARCH_WORDS
+        for word in text:
+            if word in search_keywords:
+                return 'find_event'
+        
         # Event details
-        if any(word in text for word in ['details', 'more info', 'tell me more', 'about']):
-            return 'get_details'
+        for word in text:
+            if word in ['details', 'more info', 'tell me more', 'about']:
+                return 'get_details'
 
         return 'unknown'
 

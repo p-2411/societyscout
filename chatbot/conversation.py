@@ -123,8 +123,9 @@ class ConversationManager:
         if not any(keyword in user_input.lower() for keyword in ['event', 'workshop', 'meetup', 'activity', 'find', 'search']):
             return self.fallbacks.handle_out_of_scope()
 
-        # Otherwise, it's a misunderstanding
-        return self.fallbacks.handle_misunderstanding()
+        # Otherwise, extract any filters from the input and ask for missing information
+        filters = self.rules.normalize_input(user_input)
+        return self.fallbacks.request_specific_filters(filters)
 
     def _search_events(self):
         """
