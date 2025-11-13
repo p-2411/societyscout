@@ -1,8 +1,8 @@
-"""Chatbot Rules Module
+"""
+Chatbot Rules Module
 Implements conversation flow rules and input normalization
 """
 
-import re
 import string
 
 class ChatbotRules:
@@ -11,7 +11,6 @@ class ChatbotRules:
     # Keywords for different filter types
     EVENT_TYPES = ['workshop', 'meetup', 'lecture', 'seminar', 'party', 'social', 'networking']
     ORGANIZERS = ['arc', 'library', 'club', 'clubs', 'founders', 'makerspace', 'unsw']
-    HELP_KEYWORDS = ['help', 'assist', 'assistance', 'support', 'guidance', 'how', 'info']
     FILLER_WORDS = [
         # Articles
         'the', 'a', 'an',
@@ -44,13 +43,12 @@ class ChatbotRules:
         'find', 'search', 'locate', 'discover', 'browse', 'explore',
         # Display/view terms
         'show', 'see', 'check', 'list', 'view', 'display', 'pull', 'fetch',
-        'found', 'results', 'result',
         # Question words
         'whats', 'what', 'where', 'when', 'which', 'who',
         # State verbs
         'are', 'is', 'there', 'available', 'happening', 'going', 'on', 'around',
         # Action verbs
-        'got', 'get', 'give', 'tell', 'suggest',
+        'got', 'get', 'give', 'tell', 'suggest', 'recommend',
         # Intent words
         'looking', 'interested', 'want', 'need', 'like', 'love', 'prefer',
         # Participation
@@ -58,7 +56,7 @@ class ChatbotRules:
         # Casual expressions
         'im', 'tryna', 'trying', 'wanna', 'gonna', 'gotta',
         # Help/assistance
-        'help', 'assist', 'suggestions', 'options', 'ideas',
+        'help', 'assist', 'suggestions', 'recommendations', 'options', 'ideas',
         # Generic words
         'events', 'event', 'for', 'me', 'any', 'some', 'stuff', 'things',
         'upcoming', 'future', 'new',
@@ -167,23 +165,18 @@ class ChatbotRules:
 
         # Extract date keywords
         if 'today' in text:
-            filters['date'] = 'today'
+            filters['date'] = '0 days'
         elif 'tomorrow' in text:
-            filters['date'] = 'tomorrow'
+            filters['date'] = '1 days'
         elif 'week' in text:
             if 'next' in text:
-                filters['date'] = 'next_week'
+                filters['date'] = '1 weeks'
             elif 'this' in text:
-                filters['date'] = 'this_week'
-        elif 'day' in text or 'days' in text:
+                filters['date'] = '0 weeks'
+        elif 'day' or 'days' in text:
             for word in words:
                 if (word.isdigit()):
                     filters['date'] = word + " days"
-
-        # Extract simple location references
-        location = ChatbotRules._extract_location(text)
-        if location:
-            filters['location'] = location
 
         # Store remaining keywords (exclude all common/filler words)
         filters['keywords'] = [w for w in filtered_words
@@ -205,72 +198,34 @@ class ChatbotRules:
         Returns:
             str: Intent type (greeting, find_event, get_details, cancel, reset, etc.)
         """
-        normalized = user_input.lower().strip()
-        tokens = normalized.split()
+        text = user_input.lower().strip().split()
 
         # Greeting detection
         greetings = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon']
-        for word in tokens:
+        for word in text:
             if word in greetings:
                 return 'greeting'
 
-        # Help intent
-        for word in tokens:
-            if word in ChatbotRules.HELP_KEYWORDS:
-                return 'help'
-
         # Cancel/undo commands
-        if any(word in ['cancel', 'undo', 'back'] for word in tokens):
+        if text in ['cancel', 'undo', 'back']:
             return 'cancel'
 
         # Reset commands
-        if any(word in ['reset', 'restart', 'clear'] for word in tokens) or 'start over' in normalized:
+        if text in ['reset', 'restart', 'clear', 'start over']:
             return 'reset'
-
-        # Event details (phrases come before generic search detection)
-        if any(word in ['details', 'detail'] for word in tokens):
-            return 'get_details'
-        if any(phrase in normalized for phrase in ['tell me more', 'more info', 'more about']):
-            return 'get_details'
-        if 'about' in tokens and any(token.isdigit() or token.startswith('evt') for token in tokens):
-            return 'get_details'
-
-        more_phrases = ['more events', 'show more', 'see more', 'more results', 'more please']
-        if any(phrase in normalized for phrase in more_phrases):
-            return 'more_results'
 
         # Event search
         search_keywords = ChatbotRules.SEARCH_WORDS
-        for word in tokens:
+        for word in text:
             if word in search_keywords:
                 return 'find_event'
-
-        if ChatbotRules._contains_filter_tokens(tokens):
-            return 'find_event'
+        
+        # Event details
+        for word in text:
+            if word in ['details', 'more info', 'tell me more', 'about']:
+                return 'get_details'
 
         return 'unknown'
-
-    @staticmethod
-    def _contains_filter_tokens(tokens):
-        """Check if the user mentioned known filter keywords"""
-        return any([
-            any(token in ChatbotRules.EVENT_TYPES for token in tokens),
-            any(token in ChatbotRules.ORGANIZERS for token in tokens),
-            any(token in ChatbotRules.DATE_WORDS for token in tokens),
-            any(token.isdigit() for token in tokens)
-        ])
-
-    @staticmethod
-    def _extract_location(text):
-        """Basic extraction for locations mentioned with 'in' or 'at'"""
-        label_match = re.search(r'location\s*[:=]\s*([a-z0-9\s]+)', text)
-        if label_match:
-            return label_match.group(1).strip().split()[0]
-
-        match = re.search(r'\b(?:in|at)\s+([a-z0-9]+(?:\s+[a-z0-9]+)?)', text)
-        if match:
-            return match.group(1).strip().split()[0]
-        return None
 
     @staticmethod
     def is_specific_search(filters):
