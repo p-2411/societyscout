@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from chatbot.memory import ConversationMemory
 from chatbot.rules import ChatbotRules
 from chatbot.fallbacks import FallbackHandler
+from chatbot.conversation import ConversationManager
 from data import EventDatabase
 
 def test_memory_management():
@@ -53,6 +54,10 @@ def test_input_normalization():
     filters = ChatbotRules.normalize_input("What events does Arc have?")
     assert filters['organizer'] == 'arc', "Should extract 'arc'"
 
+    # Test location extraction
+    filters = ChatbotRules.normalize_input("Any events at Kensington campus?")
+    assert filters['location'] == 'kensington', "Should extract location keyword"
+
     print("✓ Input normalization tests passed")
 
 def test_intent_detection():
@@ -71,7 +76,90 @@ def test_intent_detection():
     # Test reset
     assert ChatbotRules.detect_intent("reset") == 'reset', "Should detect reset"
 
+    # Test help
+    assert ChatbotRules.detect_intent("help me") == 'help', "Should detect help"
+
+    # Filter-only replies should still route to find_event
+    assert ChatbotRules.detect_intent("Arc") == 'find_event', "Organizer-only inputs should trigger find_event"
+    assert ChatbotRules.detect_intent("this week") == 'find_event', "Date-only inputs should trigger find_event"
+
     print("✓ Intent detection tests passed")
+
+def test_help_response():
+    """Ensure help intent returns overview and filter summary"""
+    print("Testing Help Response...")
+
+    db = EventDatabase('data/events.json')
+    convo = ConversationManager(db)
+
+    convo.memory.add_filter('event_type', 'workshop')
+    response = convo.process_message("help")
+
+    assert 'help you discover' in response.lower(), "Help response should describe capabilities"
+    assert 'current filters' in response.lower(), "Help response should mention filters"
+    assert 'workshop' in response.lower(), "Existing filters should be listed"
+
+    print("✓ Help response tests passed")
+
+def test_event_details_response():
+    """Ensure event details intent surfaces event information"""
+    print("Testing Event Details Response...")
+
+    db = EventDatabase('data/events.json')
+    convo = ConversationManager(db)
+
+    convo.process_message("show me workshops")
+    response = convo.process_message("tell me more about event 1")
+
+    assert 'workshop' in response.lower(), "Details should mention event type"
+    assert 'location:' in response.lower(), "Details should include location"
+    assert 'register:' in response.lower(), "Details should include registration link"
+
+    print("✓ Event details tests passed")
+
+def test_results_flow():
+    """Ensure results appear continuously with paging support"""
+    print("Testing Results Flow...")
+
+    db = EventDatabase('data/events.json')
+    convo = ConversationManager(db)
+
+    response = convo.process_message("workshop")
+    assert "workshop events" in response.lower(), "Should acknowledge event type"
+    assert "here are events closest matching" in response.lower(), "Should include header"
+    assert "you can still add" in response.lower(), "Should list remaining specs"
+
+    response = convo.process_message("more events")
+    assert "here are events closest matching" in response.lower(), "More page should still show events"
+    assert "you've seen all available events" in response.lower(), "Should confirm when no more remain"
+
+    convo.memory.add_filter('organizer', 'arc')
+    convo.memory.add_filter('date', 'this_week')
+    convo.memory.add_filter('location', 'kensington')
+    convo.memory.add_filter('keyword', 'tech')
+    response = convo.process_message("show events please")
+    assert "filters set" in response.lower(), "Should restate filters"
+    assert "here are events closest matching" in response.lower(), "Should keep header"
+    assert "you can still add" not in response.lower(), "Should skip missing-spec line when complete"
+
+    print("✓ Results flow tests passed")
+
+def test_unknown_actionable_suggestions():
+    """Unknown inputs should provide actionable suggestions"""
+    print("Testing Unknown Intent Suggestions...")
+
+    db = EventDatabase('data/events.json')
+    convo = ConversationManager(db)
+
+    response = convo.process_message("???")
+    assert 'help you discover unsw society events' in response.lower(), "Should restate purpose"
+    assert 'try prompts like' in response.lower(), "Should offer suggestion list"
+
+    convo.process_message("I want a workshop")
+    response = convo.process_message("maybe arc")
+    assert 'filters set' in response.lower(), "Should treat detected filters as context"
+
+    print("✓ Unknown suggestion tests passed")
 
 def test_database_search():
     """Test database search functionality"""
@@ -112,7 +200,8 @@ def test_fallback_messages():
 
     # Test misunderstanding
     msg = handler.handle_misunderstanding()
-    assert 'sorry' in msg.lower() or 'not sure' in msg.lower(), "Should apologize"
+    msg_lower = msg.lower()
+    assert 'sorry' in msg_lower or 'not sure' in msg_lower or 'clarify' in msg_lower, "Should acknowledge misunderstanding"
 
     # Test no results
     msg = handler.handle_no_results([])
@@ -137,6 +226,10 @@ def run_all_tests():
         test_intent_detection()
         test_database_search()
         test_fallback_messages()
+        test_help_response()
+        test_event_details_response()
+        test_results_flow()
+        test_unknown_actionable_suggestions()
 
         print()
         print("=" * 60)
