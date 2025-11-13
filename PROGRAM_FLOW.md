@@ -51,23 +51,17 @@ User Input
   ↓
 ConversationManager.process_message()
   ├─→ ChatbotRules.detect_intent()      # Identify what user wants
-  │   Returns: 'greeting' | 'find_event' | 'cancel' | 'reset' | 'unknown'
+  │   Returns: 'greeting' | 'find_event' | 'help' | 'cancel' | 'reset' | 'get_details' | 'more_results' | 'unknown'
   ├─→ Route to appropriate handler
   │
   └─→ For 'find_event':
-      ├─→ ChatbotRules.normalize_input()  # Extract filters from text
-      │   Returns: {event_type, date, location, organizer, keywords}
-      │
-      ├─→ ConversationMemory.add_filter()  # Store filters
-      │
-      ├─→ Check if search is specific enough
-      │   ├─→ YES: EventDatabase.search_events()
-      │   │        ↓
-      │   │   Format & display results
-      │   │
-      │   └─→ NO: Ask for more details via FallbackHandler
-      │
-      └─→ Save to conversation history
+      ├─→ ChatbotRules.normalize_input()  # Extract filters from text (event type, date, location, organizer, keywords)
+      ├─→ ConversationMemory.add_filter()  # Store new filters or keywords
+      ├─→ ConversationManager acknowledges filters (“Filters set: ...”) and lists remaining specs
+      ├─→ EventDatabase.search_events() → Always return best-effort matches
+      │     ├─→ Results are shown immediately (first 3), header cites applied filters
+      │     └─→ If more than 3, user can type “more events” to page through the rest
+      └─→ If no exact matches → progressively remove filters, state which ones were dropped, and present closest alternatives
 ```
 
 ### 3. Complete Data Flow Diagram
@@ -80,18 +74,15 @@ User Input
 [conversation.py] process_message()
     ├→ [memory.py] add_to_history('user', input)
     ├→ [rules.py] detect_intent()
-    │   └→ Returns: 'greeting' | 'find_event' | 'cancel' | 'reset' | 'unknown'
+    │   └→ Returns: 'greeting' | 'find_event' | 'more_results' | 'cancel' | 'reset' | 'unknown'
     │
     ├→ [Routing to Intent Handler]
     │   └→ If 'find_event':
     │       ├→ [rules.py] normalize_input() → Extract filters
     │       ├→ [memory.py] add_filter() → Store filters
-    │       ├→ [rules.py] is_specific_search() → Validate specificity
-    │       │   ├→ If Yes: Execute search
-    │       │   │   ├→ [data.py] search_events(filters)
-    │       │   │   └→ [conversation.py] _format_search_results()
-    │       │   └→ If No: Ask for clarification
-    │       └→ [fallbacks.py] Generate responses
+    │       ├→ [data.py] search_events(filters)
+    │       ├→ [conversation.py] format first-page results + remaining-spec hints
+    │       └→ [conversation.py] handles paging (“more events”) and closest-match fallbacks
     │
     └→ [memory.py] add_to_history('bot', response)
     ↓
@@ -119,8 +110,8 @@ Loop Back to User Input
 
 **State Management:**
 - Maintains conversation state: `initial`, `searching`, `awaiting_clarification`
-- Routes messages based on detected intent
-- Coordinates all other modules
+- Tracks `last_results`, `results_pointer`, and any `last_removed_filters` for paging/closest-match explanations
+- Routes messages based on detected intent (`find_event`, `more_results`, `get_details`, etc.)
 
 **Dependencies:**
 - EventDatabase (passed in constructor)
@@ -133,9 +124,8 @@ Loop Back to User Input
 **Role:** Natural language understanding engine
 
 **Key Methods:**
-- `detect_intent(user_input)` - Classifies user input into intent categories
-- `normalize_input(user_input)` - Extracts structured filters from natural language
-- `is_specific_search(filters)` - Validates if search has enough criteria
+- `detect_intent(user_input)` - Classifies user input into intent categories (find_event, help, more_results, get_details, etc.)
+- `normalize_input(user_input)` - Extracts structured filters from natural language (event type, date, organizer, keywords, plus basic location parsing)
 
 **Recognized Patterns:**
 
@@ -152,22 +142,16 @@ Loop Back to User Input
 - Any remaining words after filtering out event types, dates, organizers, and filler words
 
 **Processing Pipeline:**
-1. Convert to lowercase
-2. **Remove punctuation** (handles "I'm" → "im" consistently)
-3. Remove filler words (the, a, an, uh, um, like, just)
-4. Remove search-related words (find, search, looking, show, events, tryna, etc.)
-5. Extract event types
-6. Extract dates
-7. Extract organizers
-8. Remaining words become keywords (excluding numbers and common date/search terms)
+1. Convert to lowercase and strip punctuation
+2. Remove filler/search helper words, singularize plurals
+3. Detect event types, organizers, relative dates (“today”, “this_week”, “next_week”, numeric “N days”)
+4. Extract simple location hints (“in Kensington”, “location: Colombo”) with lightweight regex
+5. Treat remaining meaningful tokens as keywords
 
-**Search Specificity Logic:**
-The system now uses intelligent criteria to determine if a search is specific enough:
-- **Performs search immediately** if:
-  - User provides an event type (most important filter), OR
-  - User provides at least 2 other filters (e.g., date + organizer, date + location)
-- **Requests clarification** if:
-  - Only 1 non-event-type filter is provided (e.g., just a date or just an organizer)
+**Recommendation Flow:**
+- Every input triggers best-effort results: the bot summarizes current filters, lists missing specs, and shows the first 3 matching events (with a header quoting the filters).
+- If more than 3 matches exist, the user can type “more events” to page through additional entries.
+- When no exact matches exist, the bot progressively relaxes filters, explicitly naming the ones it removed before presenting the closest alternatives.
 
 ### ConversationMemory (chatbot/memory.py)
 
@@ -527,7 +511,7 @@ The architecture supports future enhancements:
 1. **Machine Learning Integration:**
    - Replace rule-based intent detection with ML models
    - Add sentiment analysis
-   - Implement personalized recommendations
+  - Implement personalized suggestions
 
 2. **Web Interface:**
    - Flask-based web app

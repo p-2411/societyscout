@@ -84,6 +84,25 @@ class FallbackHandler:
                 "workshops, meetups, lectures, and other campus events!")
 
     @staticmethod
+    def handle_actionable_unknown(current_filters):
+        """Provide purpose reminder and actionable suggestions for unclear input"""
+        purpose = ("I help you discover UNSW society events based on event type, date, "
+                   "location, organizer, or topics.")
+
+        suggestions = ("Try prompts like:\n"
+                       "- 'workshops this week'\n"
+                       "- 'Arc events tomorrow'\n"
+                       "- 'help' for more examples\n"
+                       "- 'more events' to see additional matches")
+
+        if current_filters:
+            filters_text = ", ".join(current_filters)
+            context = f"So far we have: {filters_text}."
+            return f"{purpose}\n{context}\n{suggestions}"
+
+        return f"{purpose}\n{suggestions}"
+
+    @staticmethod
     def handle_system_error(error_type="general"):
         """
         Handle system errors
