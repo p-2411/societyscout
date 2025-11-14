@@ -82,6 +82,7 @@ def test_intent_detection():
     # Filter-only replies should still route to find_event
     assert ChatbotRules.detect_intent("Arc") == 'find_event', "Organizer-only inputs should trigger find_event"
     assert ChatbotRules.detect_intent("this week") == 'find_event', "Date-only inputs should trigger find_event"
+    assert ChatbotRules.detect_intent("workshops") == 'find_event', "Plural event types should trigger find_event"
 
     print("✓ Intent detection tests passed")
 
@@ -127,11 +128,12 @@ def test_results_flow():
     response = convo.process_message("workshop")
     assert "workshop events" in response.lower(), "Should acknowledge event type"
     assert "here are events closest matching" in response.lower(), "Should include header"
-    assert "you can still add" in response.lower(), "Should list remaining specs"
+    assert ("still need" in response.lower()) or ("you can still add" in response.lower()), "Should list remaining specs"
 
     response = convo.process_message("more events")
-    assert "here are events closest matching" in response.lower(), "More page should still show events"
-    assert "you've seen all available events" in response.lower(), "Should confirm when no more remain"
+    total_listed = response.lower().count("type:")
+    assert total_listed == len(convo.last_results), "Should list all events for current filters"
+    assert "that's every event" in response.lower(), "Should confirm when listing is complete"
 
     convo.memory.add_filter('organizer', 'arc')
     convo.memory.add_filter('date', 'this_week')
@@ -160,6 +162,40 @@ def test_unknown_actionable_suggestions():
     assert 'filters set' in response.lower(), "Should treat detected filters as context"
 
     print("✓ Unknown suggestion tests passed")
+
+def test_saved_filter_presets():
+    """Ensure remember/use saved filters workflow functions"""
+    print("Testing Saved Filter Presets...")
+
+    db = EventDatabase('data/events.json')
+    convo = ConversationManager(db)
+
+    convo.process_message("workshops next week in kensington")
+    msg = convo.process_message("remember this")
+    assert 'saved your current filters' in msg.lower(), "Should confirm preset saved"
+
+    convo.process_message("reset")
+    response = convo.process_message("use saved filters")
+    assert 'filters set' in response.lower(), "Should reapply saved filters"
+    assert 'here are events closest matching' in response.lower(), "Should show results with saved filters"
+
+    print("✓ Saved filter preset tests passed")
+
+def test_reset_except():
+    """Ensure reset except keeps only requested filter type"""
+    print("Testing Reset Except...")
+
+    db = EventDatabase('data/events.json')
+    convo = ConversationManager(db)
+
+    convo.process_message("Arc workshops next week in library")
+    response = convo.process_message("reset except date")
+    remaining_filters = convo.memory.get_filters()
+    assert len(remaining_filters) == 1 and remaining_filters[0]['type'] == 'date', "Only date filter should remain"
+    assert 'keeping your date filters' in response.lower(), "Should mention retained filter"
+    assert 'here are events closest matching' in response.lower(), "Should rerun search"
+
+    print("✓ Reset except tests passed")
 
 def test_database_search():
     """Test database search functionality"""
@@ -229,6 +265,8 @@ def run_all_tests():
         test_help_response()
         test_event_details_response()
         test_results_flow()
+        test_saved_filter_presets()
+        test_reset_except()
         test_unknown_actionable_suggestions()
 
         print()

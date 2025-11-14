@@ -61,3 +61,8 @@ class ConversationMemory:
         self.event_filters = []
         self.conversation_history = []
         self.last_added_filter = None
+
+    def set_filters(self, filters):
+        """Replace filters with provided list (each item is a dict)."""
+        self.event_filters = [f.copy() for f in filters]
+        self.last_added_filter = self.event_filters[-1] if self.event_filters else None
