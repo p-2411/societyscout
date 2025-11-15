@@ -207,6 +207,7 @@ class ChatbotRules:
         """
         normalized = user_input.lower().strip()
         tokens = normalized.split()
+        singular_tokens = [ChatbotRules.singularize(token) for token in tokens]
 
         # Greeting detection
         greetings = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon']
@@ -218,6 +219,13 @@ class ChatbotRules:
         for word in tokens:
             if word in ChatbotRules.HELP_KEYWORDS:
                 return 'help'
+
+        if 'remember this' in normalized or normalized.startswith('remember '):
+            return 'remember_filters'
+        if 'use saved' in normalized or 'use saved filters' in normalized or 'load saved filters' in normalized:
+            return 'use_saved_filters'
+        if 'reset except' in normalized:
+            return 'reset_except'
 
         # Cancel/undo commands
         if any(word in ['cancel', 'undo', 'back'] for word in tokens):
@@ -245,7 +253,7 @@ class ChatbotRules:
             if word in search_keywords:
                 return 'find_event'
 
-        if ChatbotRules._contains_filter_tokens(tokens):
+        if ChatbotRules._contains_filter_tokens(singular_tokens):
             return 'find_event'
 
         return 'unknown'

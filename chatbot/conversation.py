@@ -20,6 +20,7 @@ class ConversationManager:
         self.last_results = []
         self.results_pointer = 0
         self.last_removed_filters = []
+        self.saved_filters = None
 
     def process_message(self, user_input):
         """
@@ -46,6 +47,12 @@ class ConversationManager:
             response = self._handle_reset()
         elif intent == 'help':
             response = self._handle_help()
+        elif intent == 'remember_filters':
+            response = self._handle_remember_filters()
+        elif intent == 'use_saved_filters':
+            response = self._handle_use_saved_filters()
+        elif intent == 'reset_except':
+            response = self._handle_reset_except(user_input)
         elif intent == 'find_event':
             response = self._handle_event_search(user_input)
         elif intent == 'more_results':
@@ -63,8 +70,11 @@ class ConversationManager:
     def _handle_greeting(self):
         """Handle greeting intent"""
         self.state = 'initial'
-        return ("Hi there! I can help you find events happening at the university. "
-                "What are you looking for?")
+        intro = "Hi there! I help you discover UNSW society events."
+        suggestions = ("Try something like 'workshops this week', 'Arc events tomorrow', "
+                       "'help' for more tips, or 'more events' if you want additional options.")
+        prompt = "What are you looking for today?"
+        return f"{intro}\n{suggestions}\n{prompt}"
 
     def _handle_cancel(self):
         """Handle cancel command"""
@@ -85,6 +95,35 @@ class ConversationManager:
         self.results_pointer = 0
         self.last_removed_filters = []
         return self.fallbacks.handle_reset_command()
+
+    def _handle_remember_filters(self):
+        filters = self.memory.get_filters()
+        if not filters:
+            return "You don't have any filters yet to remember. Describe an event first."
+        self.saved_filters = [f.copy() for f in filters]
+        return ("Saved your current filters. Say 'use saved filters' anytime to apply them again.")
+
+    def _handle_use_saved_filters(self):
+        if not self.saved_filters:
+            return "I don't have any saved filters yet. After setting some filters, say 'remember this'."
+        self.memory.set_filters(self.saved_filters)
+        return self._respond_with_current_filters(self._collect_filter_map())
+
+    def _handle_reset_except(self, user_input):
+        keep_type = self._parse_except_filter(user_input)
+        if not keep_type:
+            self.memory.reset()
+            self.last_results = []
+            self.results_pointer = 0
+            self.last_removed_filters = []
+            return ("I reset all filters. Tell me what kind of event you're after and I'll start fresh.")
+
+        kept_filters = [f for f in self.memory.get_filters() if f['type'] == keep_type]
+        self.memory.set_filters(kept_filters)
+        message = ("Keeping your " + keep_type.replace('_', ' ') +
+                   " filters and clearing the rest.")
+        response = self._respond_with_current_filters(self._collect_filter_map())
+        return message + "\n\n" + response
 
     def _handle_help(self):
         """Provide overview of bot capabilities and current filters"""
@@ -107,32 +146,8 @@ class ConversationManager:
 
     def _handle_event_search(self, user_input):
         """Handle event search request"""
-        filters = self.rules.normalize_input(user_input)
-
-        for filter_type, value in filters.items():
-            if value and filter_type != 'keywords':
-                self.memory.add_filter(filter_type, value)
-            elif filter_type == 'keywords' and value:
-                for keyword in value:
-                    self.memory.add_filter('keyword', keyword)
-
-        filter_map = self._collect_filter_map()
-        ack = self._format_filter_acknowledgment(filter_map)
-        missing = self._missing_required_filters(filter_map)
-        missing_line = self._build_missing_prompt(missing)
-
-        results = self._search_events()
-        self.state = 'searching'
-        self.last_results = results
-        self.last_removed_filters = []
-        self.results_pointer = 0
-
-        if results:
-            header = self._build_results_header(filter_map)
-            return self._render_results_response(ack, missing_line, header, results)
-
-        self.last_results = []
-        return self._handle_no_results(filter_map, ack, missing_line)
+        filter_map = self._ingest_filters(user_input=user_input)
+        return self._respond_with_current_filters(filter_map)
 
     def _handle_event_details(self, user_input):
         """Handle request for event details"""
@@ -218,30 +233,8 @@ class ConversationManager:
 
         # If we detected any new filters, add them and reuse the normal flow
         if any(value for key, value in filters.items() if key != 'keywords'):
-            for filter_type, value in filters.items():
-                if value and filter_type != 'keywords':
-                    self.memory.add_filter(filter_type, value)
-                elif filter_type == 'keywords' and value:
-                    for keyword in value:
-                        self.memory.add_filter('keyword', keyword)
-
-            filter_map = self._collect_filter_map()
-            ack = self._format_filter_acknowledgment(filter_map)
-            missing = self._missing_required_filters(filter_map)
-            missing_line = self._build_missing_prompt(missing)
-
-            results = self._search_events()
-            self.state = 'searching'
-            self.last_results = results
-            self.last_removed_filters = []
-            self.results_pointer = 0
-
-            if results:
-                header = self._build_results_header(filter_map)
-                return self._render_results_response(ack, missing_line, header, results)
-
-            self.last_results = []
-            return self._handle_no_results(filter_map, ack, missing_line)
+            filter_map = self._ingest_filters(parsed_filters=filters)
+            return self._respond_with_current_filters(filter_map)
 
         # Otherwise provide purpose reminder + actionable suggestions
         existing = self.memory.get_filters()
@@ -265,7 +258,7 @@ class ConversationManager:
 
         return results
 
-    def _handle_no_results(self, filter_map, ack=None, missing_line=None):
+    def _handle_no_results(self, filter_map, ack=None, missing_line=None, followup_line=None):
         """Handle scenario when no events match the search"""
         original_filters = self.memory.get_filters()
         removed = []
@@ -290,6 +283,8 @@ class ConversationManager:
                 more_prompt = self._more_results_prompt(len(similar_results), self.results_pointer)
                 if more_prompt:
                     parts.append(more_prompt)
+                if followup_line:
+                    parts.append(followup_line)
                 return "\n\n".join(parts)
 
         for item in reversed(removed):
@@ -299,6 +294,8 @@ class ConversationManager:
         self.last_removed_filters = []
         parts = [text for text in [ack, missing_line] if text]
         parts.append("No events available even after relaxing filters.")
+        if followup_line:
+            parts.append(followup_line)
         return "\n\n".join(parts)
 
     def _format_search_results(self, results, header=None):
@@ -336,7 +333,7 @@ class ConversationManager:
 
         return "\n".join(lines)
 
-    def _render_results_response(self, ack, missing_line, header, results):
+    def _render_results_response(self, ack, missing_line, followup_line, header, results):
         visible = results[:3]
         self.results_pointer = min(3, len(results))
         response_parts = [part for part in [ack, missing_line,
@@ -344,6 +341,8 @@ class ConversationManager:
         more_prompt = self._more_results_prompt(len(results), self.results_pointer)
         if more_prompt:
             response_parts.append(more_prompt)
+        if followup_line:
+            response_parts.append(followup_line)
         return "\n\n".join(response_parts)
 
     def _handle_more_results(self):
@@ -352,29 +351,20 @@ class ConversationManager:
             return ("I don't have earlier results to extend. Tell me what kind of event you're "
                     "after and I'll search again.")
 
-        if self.results_pointer >= len(self.last_results):
-            return "You've seen all available events for the current filters."
-
         filter_map = self._collect_filter_map()
         header = self._build_results_header(filter_map, self.last_removed_filters)
+        response = self._format_search_results(self.last_results, header)
+        self.results_pointer = len(self.last_results)
 
-        start = self.results_pointer
-        end = min(start + 3, len(self.last_results))
-        chunk = self.last_results[start:end]
-        self.results_pointer = end
+        missing = self._missing_required_filters(filter_map)
+        missing_line = self._build_missing_prompt(missing)
+        followup_line = self._build_followup_prompt(missing)
 
-        response = self._format_search_results(chunk, header)
-        more_prompt = self._more_results_prompt(len(self.last_results), self.results_pointer)
-        missing_line = self._build_missing_prompt(self._missing_required_filters(filter_map))
-
-        parts = [response]
-        if more_prompt:
-            parts.append(more_prompt)
-        elif self.results_pointer >= len(self.last_results):
-            parts.append("You've seen all available events for the current filters.")
+        parts = [response, "That's every event I can find for these filters."]
         if missing_line:
             parts.append(missing_line)
-
+        if followup_line:
+            parts.append(followup_line)
         return "\n\n".join(parts)
 
     def _format_current_filters(self):
@@ -419,8 +409,11 @@ class ConversationManager:
             parts.append(self._humanize_value(filter_map['date']))
 
         if parts:
-            return "Filters set: " + ", ".join(parts)
-        return "No filters yet. Tell me what you're after."
+            summary = ", ".join(parts)
+            return ("Filters set: " + summary +
+                    "\nGreat! I'll keep searching for options like that.")
+        return ("I don't have any filters yet. Tell me what you're in the mood for—"
+                "maybe 'workshops this week' or 'Arc events tomorrow'.")
 
     def _missing_required_filters(self, filter_map):
         missing = []
@@ -437,15 +430,26 @@ class ConversationManager:
         return missing
 
     def _build_missing_prompt(self, missing):
+        """Return a prioritized prompt for the most useful missing filter"""
         if not missing:
             return ""
 
-        if len(missing) == 1:
-            missing_text = missing[0]
-        else:
-            missing_text = ", ".join(missing[:-1]) + f", and {missing[-1]}"
+        priority = missing[0]
+        templates = {
+            'an event type': "Still need an event type. Try 'workshop', 'seminar', or 'meetup'.",
+            'a date/time': "Still need a date. Try 'today', 'this week', or 'next week'.",
+            'a location': "Still need a location. Try 'in Kensington' or name a campus building.",
+            'an organizer': "Still need an organizer. Try 'Arc', 'Library', or a club name.",
+            'some keywords/topics': "Still need a topic. Try words like 'tech', 'design', or 'social'."
+        }
+        return templates.get(priority, f"You can still add {priority} for sharper matches.")
 
-        return f"You can still add {missing_text} for sharper matches."
+    def _build_followup_prompt(self, missing):
+        if missing:
+            return ("Need more ideas? Add one of those details or ask for 'more events'. "
+                    "You can also say 'remember this' once you're happy with the filters.")
+        return ("Want something else? Ask for details (e.g., 'tell me about number 2'), "
+                "say 'remember this' to save these filters, or try 'reset except date' to tweak them.")
 
     @staticmethod
     def _humanize_value(value):
@@ -456,7 +460,7 @@ class ConversationManager:
         if total > shown:
             remaining = total - shown
             label = "event" if remaining == 1 else "events"
-            return f"{remaining} more {label} available. Say 'more events' to see them."
+            return f"{remaining} more {label} available. Say 'more events' to see the full list."
         return ""
 
     def _build_results_header(self, filter_map, removed_filters=None):
@@ -471,3 +475,62 @@ class ConversationManager:
                 f"{item['type']}='{item['value']}'" for item in removed_filters)
             header += f" Removed {removed_text}."
         return header
+
+    def _parse_except_filter(self, user_input):
+        text = user_input.lower()
+        if 'except' not in text:
+            return None
+
+        mapping = [
+            ('event type', 'event_type'),
+            ('event', 'event_type'),
+            ('type', 'event_type'),
+            ('date', 'date'),
+            ('time', 'date'),
+            ('day', 'date'),
+            ('location', 'location'),
+            ('place', 'location'),
+            ('organizer', 'organizer'),
+            ('host', 'organizer'),
+            ('keyword', 'keyword'),
+            ('keywords', 'keyword'),
+            ('topic', 'keyword'),
+            ('topics', 'keyword')
+        ]
+
+        for phrase, filter_type in mapping:
+            if phrase in text:
+                return filter_type
+        return None
+
+    def _ingest_filters(self, user_input=None, parsed_filters=None):
+        filters = parsed_filters or self.rules.normalize_input(user_input or "")
+        for filter_type, value in filters.items():
+            if value and filter_type != 'keywords':
+                self.memory.add_filter(filter_type, value)
+            elif filter_type == 'keywords' and value:
+                for keyword in value:
+                    self.memory.add_filter('keyword', keyword)
+        return self._collect_filter_map()
+
+    def _reset_paging(self, results, removed_filters=None):
+        self.state = 'searching'
+        self.last_results = results
+        self.results_pointer = 0 if results else 0
+        self.last_removed_filters = removed_filters or []
+
+    def _respond_with_current_filters(self, filter_map=None):
+        filter_map = filter_map or self._collect_filter_map()
+        ack = self._format_filter_acknowledgment(filter_map)
+        missing = self._missing_required_filters(filter_map)
+        missing_line = self._build_missing_prompt(missing)
+        followup_line = self._build_followup_prompt(missing)
+
+        results = self._search_events()
+        self._reset_paging(results)
+
+        if results:
+            header = self._build_results_header(filter_map, self.last_removed_filters)
+            return self._render_results_response(ack, missing_line, followup_line, header, results)
+
+        return self._handle_no_results(filter_map, ack, missing_line, followup_line)

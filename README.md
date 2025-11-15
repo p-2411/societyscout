@@ -20,7 +20,7 @@ UNSW students struggle to find relevant university activities due to a lack of c
 
 Society Scout is a chatbot that centralizes all UNSW events in one place, allowing students to:
 - Search for events by type, date, location, and organizer
-- Get personalized event recommendations
+- Get personalized event suggestions
 - Discover events that match their interests and schedule
 
 ## Key Features
@@ -29,6 +29,7 @@ Society Scout is a chatbot that centralizes all UNSW events in one place, allowi
 - **Smart Filtering**: Search by keywords, dates, topics, and locations
 - **Conversational Interface**: Natural language interaction
 - **Memory Management**: Remembers user preferences throughout conversation
+- **Filter Presets**: Save current filters, reuse them later, or reset everything except a chosen field
 - **Fallback Handling**: Graceful error handling and helpful suggestions
 
 ## Success Metrics

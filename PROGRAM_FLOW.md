@@ -111,6 +111,7 @@ Loop Back to User Input
 **State Management:**
 - Maintains conversation state: `initial`, `searching`, `awaiting_clarification`
 - Tracks `last_results`, `results_pointer`, and any `last_removed_filters` for paging/closest-match explanations
+- Supports saved presets (`remember this`, `use saved filters`) and selective resets (`reset except <filter>`)
 - Routes messages based on detected intent (`find_event`, `more_results`, `get_details`, etc.)
 
 **Dependencies:**
