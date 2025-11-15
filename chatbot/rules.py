@@ -12,6 +12,36 @@ class ChatbotRules:
     EVENT_TYPES = ['workshop', 'meetup', 'lecture', 'seminar', 'party', 'social', 'networking']
     ORGANIZERS = ['arc', 'library', 'club', 'clubs', 'founders', 'makerspace', 'unsw']
     HELP_KEYWORDS = ['help', 'assist', 'assistance', 'support', 'guidance', 'how', 'info']
+    GREETING_WORDS = ['hi', 'hello', 'hey', 'greetings', 'good', 'morning', 'afternoon', 'evening']
+
+    # Known topic keywords (frame-slot approach for topic extraction)
+    TOPIC_KEYWORDS = [
+        # Technology & Computing
+        'coding', 'programming', 'tech', 'technology', 'computer', 'software', 'hardware',
+        'python', 'java', 'javascript', 'web', 'app', 'mobile', 'ai', 'ml', 'data', 'cyber',
+        'security', 'blockchain', 'game', 'gaming', 'vr', 'ar', 'cloud', 'database',
+        # Design & Creative
+        'design', 'graphic', 'ui', 'ux', 'art', 'creative', 'photography', 'video',
+        'animation', 'film', 'music', 'theater', 'performance', 'drawing', 'painting',
+        # Business & Professional
+        'business', 'entrepreneurship', 'startup', 'marketing', 'finance', 'accounting',
+        'consulting', 'leadership', 'management', 'career', 'professional', 'internship',
+        'networking', 'resume', 'interview',
+        # Academic & Science
+        'research', 'science', 'engineering', 'math', 'physics', 'chemistry', 'biology',
+        'medicine', 'health', 'psychology', 'law', 'history', 'literature', 'language',
+        # Social & Cultural
+        'culture', 'cultural', 'diversity', 'community', 'volunteer', 'charity', 'social',
+        'environment', 'sustainability', 'activism', 'politics', 'debate', 'discussion',
+        # Sports & Wellness
+        'sport', 'sports', 'fitness', 'yoga', 'wellness', 'mental', 'mindfulness',
+        'meditation', 'dance', 'running', 'soccer', 'basketball', 'volleyball',
+        # Food & Drink
+        'food', 'cooking', 'baking', 'coffee', 'wine', 'dining', 'culinary',
+        # Other relevant topics
+        'student', 'study', 'academic', 'exam', 'tutorial', 'session', 'training',
+        'competition', 'hackathon', 'showcase', 'exhibition', 'conference', 'panel'
+    ]
     FILLER_WORDS = [
         # Articles
         'the', 'a', 'an',
@@ -23,7 +53,7 @@ class ChatbotRules:
         # Uncertainty
         'maybe', 'probably', 'perhaps', 'possibly',
         # Quantifiers (general)
-        'some', 'any', 'all', 'every', 'each',
+        'some', 'any', 'all', 'every', 'each', 'lot', 'lots', 'much', 'many', 'few',
         # Demonstratives
         'that', 'this', 'these', 'those', 'it', 'its',
         # Common verbs
@@ -34,9 +64,14 @@ class ChatbotRules:
         'will', 'would', 'could', 'should', 'shall',
         'may', 'might', 'must', 'can', 'cant',
         # Prepositions
-        'in', 'on', 'at', 'by', 'with', 'from', 'of', 'to', 'as',
+        'in', 'on', 'at', 'by', 'with', 'from', 'of', 'to', 'as', 'for',
         # Pronouns
-        'i', 'me', 'my', 'mine', 'you', 'your', 'yours'
+        'i', 'me', 'my', 'mine', 'you', 'your', 'yours',
+        # Conjunctions
+        'and', 'or', 'but', 'nor', 'yet',
+        # Other common words that aren't topics
+        'involve', 'involves', 'involving', 'include', 'includes', 'including',
+        'contain', 'contains', 'containing', 'feature', 'features', 'featuring'
     ]
 
     SEARCH_WORDS = [
@@ -97,16 +132,28 @@ class ChatbotRules:
     @staticmethod
     def singularize(word):
         """
-        Convert plural words to singular form
+        Convert plural words and verb forms to base form
 
         Args:
             word: Word to singularize
 
         Returns:
-            str: Singular form of the word
+            str: Base form of the word
         """
         if len(word) <= 2:
             return word
+
+        # Handle -ing verb forms (partying -> party, networking -> network)
+        if word.endswith('ing') and len(word) > 4:
+            base = word[:-3]  # Remove 'ing'
+            # Check if we need to add 'y' back (partying -> party)
+            if len(base) > 0 and base[-1] not in 'aeiou':
+                # Try with 'y' suffix
+                base_with_y = base + 'y'
+                # Return the version with 'y' for consistency
+                if base_with_y in ChatbotRules.EVENT_TYPES:
+                    return base_with_y
+            return base
 
         # Handle common plural patterns
         if word.endswith('ies') and len(word) > 3:
@@ -155,7 +202,7 @@ class ChatbotRules:
             'keywords': []
         }
 
-        # Check for event types 
+        # Check for event types
         for word in filtered_words:
             if word in ChatbotRules.EVENT_TYPES:
                 filters['event_type'] = word
@@ -185,35 +232,77 @@ class ChatbotRules:
         if location:
             filters['location'] = location
 
-        # Store remaining keywords (exclude all common/filler words)
-        filters['keywords'] = [w for w in filtered_words
-                               if w not in ChatbotRules.EVENT_TYPES
-                               and w not in ChatbotRules.ORGANIZERS
-                               and w not in ChatbotRules.DATE_WORDS
-                               and w not in ChatbotRules.SEARCH_WORDS
-                               and not w.isdigit()]  # Also exclude numbers
+        # Frame-slot approach: Extract topic keywords that match known topics
+        # Only keep words that are either:
+        # 1. In our TOPIC_KEYWORDS list (known relevant topics)
+        # 2. Longer than 4 characters and not in exclusion lists (potential domain-specific terms)
+        potential_keywords = [w for w in filtered_words
+                             if w not in ChatbotRules.EVENT_TYPES
+                             and w not in ChatbotRules.ORGANIZERS
+                             and w not in ChatbotRules.DATE_WORDS
+                             and w not in ChatbotRules.SEARCH_WORDS
+                             and w not in ChatbotRules.GREETING_WORDS
+                             and not w.isdigit()]
+
+        # Validate keywords using frame-slot approach
+        filters['keywords'] = [w for w in potential_keywords
+                              if w in ChatbotRules.TOPIC_KEYWORDS  # Known topic
+                              or len(w) >= 5]  # Or longer word (likely specific topic)
+
         return filters
 
     @staticmethod
-    def detect_intent(user_input):
+    def contains_greeting(user_input):
         """
-        Detect user intent from input
+        Check if user input contains a greeting
 
         Args:
             user_input: User input string
 
         Returns:
-            str: Intent type (greeting, find_event, get_details, cancel, reset, etc.)
+            bool: True if input contains a greeting
+        """
+        normalized = user_input.lower().strip()
+        tokens = normalized.split()
+        # Check for greeting words and common greeting phrases
+        greeting_phrases = ['good morning', 'good afternoon', 'good evening']
+        if any(phrase in normalized for phrase in greeting_phrases):
+            return True
+        return any(word in ChatbotRules.GREETING_WORDS for word in tokens)
+
+    @staticmethod
+    def detect_intent(user_input):
+        """
+        Detect user intent from input (excluding greetings)
+
+        Args:
+            user_input: User input string
+
+        Returns:
+            str: Intent type (find_event, get_details, cancel, reset, etc.)
         """
         normalized = user_input.lower().strip()
         tokens = normalized.split()
         singular_tokens = [ChatbotRules.singularize(token) for token in tokens]
 
-        # Greeting detection
-        greetings = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon']
-        for word in tokens:
-            if word in greetings:
-                return 'greeting'
+        # Uncertainty/don't know intent
+        uncertainty_phrases = [
+            "i don't know", "i dont know", "idk", "not sure", "unsure",
+            "don't know", "dont know", "no idea", "no clue", "dunno",
+            "whatever", "anything", "surprise me"
+        ]
+        if any(phrase in normalized for phrase in uncertainty_phrases):
+            return 'uncertainty'
+
+        # Positive responses (for random selection)
+        positive_phrases = ['yes', 'yeah', 'yep', 'sure', 'ok', 'okay', 'yea', 'ya']
+        if normalized in positive_phrases or normalized.startswith(tuple(p + ' ' for p in positive_phrases)):
+            return 'positive_response'
+
+        # Negative responses
+        negative_phrases = ['no', 'nah', 'nope', 'not really', 'no thanks', 'no thank you']
+        if normalized in negative_phrases or any(phrase in normalized for phrase in negative_phrases):
+            return 'negative_response'
 
         # Help intent
         for word in tokens:
@@ -255,6 +344,10 @@ class ChatbotRules:
 
         if ChatbotRules._contains_filter_tokens(singular_tokens):
             return 'find_event'
+
+        # Greeting detection (as fallback if no other intent detected)
+        if ChatbotRules.contains_greeting(user_input):
+            return 'greeting'
 
         return 'unknown'
 

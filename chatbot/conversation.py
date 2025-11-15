@@ -16,11 +16,12 @@ class ConversationManager:
         self.rules = ChatbotRules()
         self.fallbacks = FallbackHandler()
         self.event_db = event_database
-        self.state = 'initial'  # initial, searching, awaiting_clarification
+        self.state = 'initial'  # initial, searching, awaiting_clarification, awaiting_random_response
         self.last_results = []
         self.results_pointer = 0
         self.last_removed_filters = []
         self.saved_filters = None
+        self.awaiting_random_confirmation = False
 
     def process_message(self, user_input):
         """
@@ -35,32 +36,56 @@ class ConversationManager:
         # Store user message in history
         self.memory.add_to_history('user', user_input)
 
+        # Check for greeting
+        has_greeting = self.rules.contains_greeting(user_input)
+
         # Detect intent
         intent = self.rules.detect_intent(user_input)
 
         # Route to appropriate handler
         if intent == 'greeting':
             response = self._handle_greeting()
+            self.awaiting_random_confirmation = False
+        elif intent == 'uncertainty':
+            response = self._handle_uncertainty()
+        elif intent == 'positive_response' and self.awaiting_random_confirmation:
+            response = self._handle_random_selection()
+        elif intent == 'negative_response' and self.awaiting_random_confirmation:
+            response = self._handle_decline_random()
         elif intent == 'cancel':
             response = self._handle_cancel()
+            self.awaiting_random_confirmation = False
         elif intent == 'reset':
             response = self._handle_reset()
+            self.awaiting_random_confirmation = False
         elif intent == 'help':
             response = self._handle_help()
+            self.awaiting_random_confirmation = False
         elif intent == 'remember_filters':
             response = self._handle_remember_filters()
+            self.awaiting_random_confirmation = False
         elif intent == 'use_saved_filters':
             response = self._handle_use_saved_filters()
+            self.awaiting_random_confirmation = False
         elif intent == 'reset_except':
             response = self._handle_reset_except(user_input)
+            self.awaiting_random_confirmation = False
         elif intent == 'find_event':
             response = self._handle_event_search(user_input)
+            self.awaiting_random_confirmation = False
         elif intent == 'more_results':
             response = self._handle_more_results()
+            self.awaiting_random_confirmation = False
         elif intent == 'get_details':
             response = self._handle_event_details(user_input)
+            self.awaiting_random_confirmation = False
         else:
             response = self._handle_unknown(user_input)
+            self.awaiting_random_confirmation = False
+
+        # If there's a greeting and another intent, prepend short greeting
+        if has_greeting and intent != 'greeting':
+            response = "Hi there! " + response
 
         # Store bot response in history
         self.memory.add_to_history('bot', response)
@@ -127,26 +152,128 @@ class ConversationManager:
 
     def _handle_help(self):
         """Provide overview of bot capabilities and current filters"""
-        overview = (
-            "I help you discover UNSW society events. Describe what you're after using a mix of "
-            "event types (workshops, meetups), dates (today, next week), organizers (Arc, clubs), "
-            "locations, or topics (coding, design)."
-        )
+        help_text = [
+            "=== SOCIETY SCOUT HELP ===\n",
+            "I help you discover UNSW society events. You can search by combining different criteria:\n",
 
-        guidance = (
-            "You can say things like 'workshops this week', 'Arc events tomorrow', or "
-            "'show me social events in Kensington'. Use 'cancel' to undo the last filter or "
-            "'reset' to start fresh."
-        )
+            "SEARCH BY EVENT TYPE:",
+            "  • workshops, meetups, seminars, lectures",
+            "  • social events, parties, networking events",
+            "  Example: 'show me workshops'\n",
+
+            "SEARCH BY DATE/TIME:",
+            "  • today, tomorrow, this week, next week",
+            "  • specific days: Monday, Tuesday, etc.",
+            "  Example: 'events tomorrow' or 'workshops this week'\n",
+
+            "SEARCH BY ORGANIZER:",
+            "  • Arc, Library, clubs, specific club names",
+            "  Example: 'Arc events' or 'Library workshops'\n",
+
+            "SEARCH BY LOCATION:",
+            "  • campus buildings, general locations",
+            "  Example: 'events in Kensington' or 'workshops at the Library'\n",
+
+            "SEARCH BY TOPIC/KEYWORDS:",
+            "  • Any relevant topics like 'coding', 'design', 'tech', etc.",
+            "  Example: 'tech workshops' or 'coding events'\n",
+
+            "COMBINE CRITERIA:",
+            "  • 'workshops about coding this week'",
+            "  • 'Arc social events tomorrow'",
+            "  • 'networking events in Kensington'\n",
+
+            "USEFUL COMMANDS:",
+            "  • 'help' - Show this help message",
+            "  • 'cancel' - Undo your last filter",
+            "  • 'reset' - Clear all filters and start over",
+            "  • 'reset except [type]' - Clear all filters except one (e.g., 'reset except date')",
+            "  • 'remember this' - Save your current filters",
+            "  • 'use saved filters' - Reapply your saved filters",
+            "  • 'more events' - See additional search results",
+            "  • 'tell me about event [number]' - Get details about a specific event",
+            "  • 'I don't know' - Get suggestions or random events\n",
+
+            "TIPS:",
+            "  • You can search with just one criterion or combine multiple",
+            "  • If no exact matches are found, I'll show close alternatives",
+            "  • Say hi or greet me anytime - I'm friendly!\n"
+        ]
 
         current_filters = self._format_current_filters()
-        filters_msg = f"Current filters: {current_filters}"
+        help_text.append(f"YOUR CURRENT FILTERS: {current_filters}")
 
-        return f"{overview}\n\n{guidance}\n\n{filters_msg}"
+        return "\n".join(help_text)
+
+    def _handle_uncertainty(self):
+        """Handle when user expresses uncertainty or doesn't know what they want"""
+        self.awaiting_random_confirmation = True
+        self.state = 'awaiting_random_response'
+
+        suggestions = (
+            "No worries! Here are some ideas:\n\n"
+            "Event types: workshops, meetups, seminars, social events, networking\n"
+            "Times: today, tomorrow, this week, next week\n"
+            "Organizers: Arc, Library, various clubs\n\n"
+            "Or I can pick 3 random events for you to browse. Would you like that?"
+        )
+        return suggestions
+
+    def _handle_random_selection(self):
+        """Provide 3 random events when user confirms they want random selection"""
+        import random
+
+        self.awaiting_random_confirmation = False
+        self.state = 'searching'
+
+        all_events = self.event_db.get_all_events()
+
+        if not all_events:
+            return "Sorry, I don't have any events in the database right now."
+
+        # Select up to 3 random events
+        num_to_select = min(3, len(all_events))
+        random_events = random.sample(all_events, num_to_select)
+
+        self.last_results = random_events
+        self.results_pointer = len(random_events)
+
+        header = f"Here {'is a random event' if num_to_select == 1 else f'are {num_to_select} random events'} you might enjoy:"
+        return self._format_search_results(random_events, header)
+
+    def _handle_decline_random(self):
+        """Handle when user declines random selection"""
+        self.awaiting_random_confirmation = False
+        self.state = 'initial'
+
+        return (
+            "No problem! Feel free to describe what you're looking for—like "
+            "'workshops this week' or 'Arc events tomorrow'—and I'll help you find it."
+        )
 
     def _handle_event_search(self, user_input):
         """Handle event search request"""
         filter_map = self._ingest_filters(user_input=user_input)
+
+        # Check if any meaningful filters were actually extracted (excluding just keywords)
+        has_structured_filters = any([
+            filter_map.get('event_type'),
+            filter_map.get('date'),
+            filter_map.get('location'),
+            filter_map.get('organizer')
+        ])
+
+        # Check if input explicitly mentions events/activities
+        user_lower = user_input.lower()
+        mentions_events = any(word in user_lower for word in ['event', 'events', 'activity', 'activities'])
+
+        # Only proceed with search if we have structured filters OR
+        # (have keywords AND user explicitly mentioned events)
+        if not has_structured_filters:
+            if not (filter_map.get('keywords') and mentions_events):
+                # No meaningful search criteria, treat as unknown
+                return self._handle_unknown(user_input)
+
         return self._respond_with_current_filters(filter_map)
 
     def _handle_event_details(self, user_input):
@@ -190,31 +317,83 @@ class ConversationManager:
             return ("I couldn't find that event. Try referencing the event number from the last "
                     "results or provide an event ID like EVT003.")
 
-        details = [
-            f"{event['title']} ({event['type'].title()})",
-            f"Date: {event.get('date', 'TBD')} at {event.get('time', 'TBA')}",
-            f"Location: {event.get('location', 'TBA')}"
-        ]
+        # Build beautifully formatted event details
+        details = []
 
+        # Header with title
+        details.append("╔" + "═" * 70 + "╗")
+        details.append(f"║  {event['title'].upper()}")
+        details.append("╠" + "═" * 70 + "╣")
+
+        # Event type
+        event_type = event.get('type', 'event').replace('_', ' ').title()
+        details.append(f"║  📋 Type: {event_type}")
+
+        # Date and time
+        time_info = event.get('time', 'TBA')
+        date_info = event.get('date', 'TBD')
+
+        if date_info != 'TBD':
+            time_display = f"{date_info}"
+            if time_info != 'TBA':
+                time_display += f" at {time_info}"
+            details.append(f"║  📅 When: {time_display}")
+        elif time_info != 'TBA':
+            details.append(f"║  📅 Time: {time_info}")
+
+        # Location
+        if location_info := event.get('location', 'TBA'):
+            if location_info != 'TBA':
+                details.append(f"║  📍 Where: {location_info}")
+
+        # Organizer
         if organizer := event.get('organizer'):
-            details.append(f"Organizer: {organizer}")
+            details.append(f"║  👥 Host: {organizer}")
 
+        # Club
         if club := event.get('club_name'):
-            details.append(f"Club: {club}")
+            details.append(f"║  🏛️  Club: {club}")
 
-        if description := event.get('description'):
-            details.append("Description: " + description)
-
-        if tags := event.get('tags'):
-            details.append("Topics: " + ", ".join(tags))
-
-        if link := event.get('registration_link'):
-            details.append(f"Register: {link}")
-
+        # Cost
         if cost := event.get('cost'):
-            details.append(f"Cost: {cost}")
+            details.append(f"║  💰 Cost: {cost}")
 
-        details.append("Would you like details for another event?")
+        # Topics
+        if tags := event.get('tags'):
+            topics_text = ", ".join(tags)
+            details.append(f"║  🏷️  Topics: {topics_text}")
+
+        # Description section
+        if description := event.get('description'):
+            details.append("╠" + "═" * 70 + "╣")
+            details.append("║  📝 DESCRIPTION:")
+            details.append("║")
+            # Wrap description text
+            desc_lines = description.split('\n')
+            for line in desc_lines:
+                if len(line) <= 66:
+                    details.append(f"║  {line}")
+                else:
+                    # Simple word wrapping
+                    words = line.split()
+                    current_line = "║  "
+                    for word in words:
+                        if len(current_line) + len(word) + 1 <= 68:
+                            current_line += word + " "
+                        else:
+                            details.append(current_line.rstrip())
+                            current_line = "║  " + word + " "
+                    if current_line.strip() != "║":
+                        details.append(current_line.rstrip())
+
+        # Registration link
+        if link := event.get('registration_link'):
+            details.append("╠" + "═" * 70 + "╣")
+            details.append(f"║  🔗 Register: {link}")
+
+        details.append("╚" + "═" * 70 + "╝")
+        details.append("")
+        details.append("💡 Would you like details for another event?")
 
         return "\n".join(details)
 
@@ -260,7 +439,6 @@ class ConversationManager:
 
     def _handle_no_results(self, filter_map, ack=None, missing_line=None, followup_line=None):
         """Handle scenario when no events match the search"""
-        original_filters = self.memory.get_filters()
         removed = []
 
         while self.memory.get_filters():
@@ -280,11 +458,16 @@ class ConversationManager:
 
                 parts = [text for text in [ack, missing_line,
                                             self._format_search_results(visible, header)] if text]
+
+                # Only show ONE prompt at a time
                 more_prompt = self._more_results_prompt(len(similar_results), self.results_pointer)
-                if more_prompt:
+                if missing_line:
+                    pass  # Already have missing info prompt
+                elif more_prompt:
                     parts.append(more_prompt)
-                if followup_line:
+                elif followup_line:
                     parts.append(followup_line)
+
                 return "\n\n".join(parts)
 
         for item in reversed(removed):
@@ -293,9 +476,12 @@ class ConversationManager:
         self.last_results = []
         self.last_removed_filters = []
         parts = [text for text in [ack, missing_line] if text]
-        parts.append("No events available even after relaxing filters.")
-        if followup_line:
+        parts.append("I couldn't find any events matching those criteria, even after broadening the search.")
+
+        # Only show ONE prompt at a time
+        if not missing_line and followup_line:
             parts.append(followup_line)
+
         return "\n\n".join(parts)
 
     def _format_search_results(self, results, header=None):
@@ -309,7 +495,7 @@ class ConversationManager:
             str: Formatted results
         """
         if not results:
-            return "No events found."
+            return "I couldn't find any events matching that."
 
         lines = []
         if header:
@@ -317,19 +503,43 @@ class ConversationManager:
             lines.append("")
 
         for i, event in enumerate(results[:5], 1):  # Show max 5 events
-            lines.append(f"{i}. {event['title']}")
-            lines.append(f"   Type: {event['type']}")
-            lines.append(f"   Date: {event['date']}")
-            lines.append(f"   Location: {event['location']}")
+            # Add visual separator
+            lines.append("┌" + "─" * 70 + "┐")
+
+            # Event number and title
+            event_title = event['title']
+            lines.append(f"│ [{i}] {event_title.upper()}")
+
+            # Event type
+            event_type = event.get('type', 'event').replace('_', ' ').title()
+            lines.append(f"│     Type: {event_type}")
+
+            # Date information
+            if 'date' in event:
+                date_info = event['date']
+                if 'time' in event and event['time'] != 'TBA':
+                    date_info += f" at {event['time']}"
+                lines.append(f"│     📅 When: {date_info}")
+
+            # Location
+            if 'location' in event:
+                lines.append(f"│     📍 Where: {event['location']}")
+
+            # Organizer
             if 'organizer' in event:
-                lines.append(f"   Organizer: {event['organizer']}")
+                lines.append(f"│     👥 Host: {event['organizer']}")
+
+            lines.append("└" + "─" * 70 + "┘")
             lines.append("")
 
         if len(results) > 5:
-            lines.append(f"... and {len(results) - 5} more events.")
+            remaining = len(results) - 5
+            lines.append(f"✨ Plus {remaining} more event{'s' if remaining != 1 else ''} available!")
             lines.append("")
 
-        lines.append("Would you like to know more about any of these events?")
+        # Always let users know they can get more details
+        lines.append("💡 Say 'tell me about event 1' (or any number) to learn more about a specific event.")
+        lines.append("🔄 Continue refining your search, or say 'reset' to start fresh.")
 
         return "\n".join(lines)
 
@@ -338,11 +548,20 @@ class ConversationManager:
         self.results_pointer = min(3, len(results))
         response_parts = [part for part in [ack, missing_line,
                                             self._format_search_results(visible, header)] if part]
+
+        # Only show ONE prompt at a time (priority order: missing info > more results > other actions)
         more_prompt = self._more_results_prompt(len(results), self.results_pointer)
-        if more_prompt:
+
+        if missing_line:
+            # If asking for missing info, don't add other prompts
+            pass
+        elif more_prompt:
+            # If there are more results, show that prompt
             response_parts.append(more_prompt)
-        if followup_line:
+        elif followup_line:
+            # Otherwise show the action prompt
             response_parts.append(followup_line)
+
         return "\n\n".join(response_parts)
 
     def _handle_more_results(self):
@@ -358,13 +577,16 @@ class ConversationManager:
 
         missing = self._missing_required_filters(filter_map)
         missing_line = self._build_missing_prompt(missing)
-        followup_line = self._build_followup_prompt(missing)
+        followup_line = self._build_followup_prompt()
 
-        parts = [response, "That's every event I can find for these filters."]
+        parts = [response, "That's all the events I found!"]
+
+        # Only show ONE prompt at a time
         if missing_line:
             parts.append(missing_line)
-        if followup_line:
+        elif followup_line:
             parts.append(followup_line)
+
         return "\n\n".join(parts)
 
     def _format_current_filters(self):
@@ -395,7 +617,8 @@ class ConversationManager:
 
         return filter_map
 
-    def _format_filter_acknowledgment(self, filter_map):
+    def _format_filter_summary(self, filter_map):
+        """Format filters into a human-readable summary"""
         parts = []
         if filter_map['event_type']:
             parts.append(f"{filter_map['event_type']} events")
@@ -408,10 +631,13 @@ class ConversationManager:
         if filter_map['date']:
             parts.append(self._humanize_value(filter_map['date']))
 
-        if parts:
-            summary = ", ".join(parts)
-            return ("Filters set: " + summary +
-                    "\nGreat! I'll keep searching for options like that.")
+        return ", ".join(parts) if parts else None
+
+    def _format_filter_acknowledgment(self, filter_map):
+        """Format an acknowledgment message for the current filters"""
+        summary = self._format_filter_summary(filter_map)
+        if summary:
+            return f"Looking for {summary}."
         return ("I don't have any filters yet. Tell me what you're in the mood for—"
                 "maybe 'workshops this week' or 'Arc events tomorrow'.")
 
@@ -429,27 +655,15 @@ class ConversationManager:
             missing.append('some keywords/topics')
         return missing
 
-    def _build_missing_prompt(self, missing):
+    def _build_missing_prompt(self, _missing):
         """Return a prioritized prompt for the most useful missing filter"""
-        if not missing:
-            return ""
+        # Disabled: Don't prompt users for missing fields
+        return None
 
-        priority = missing[0]
-        templates = {
-            'an event type': "Still need an event type. Try 'workshop', 'seminar', or 'meetup'.",
-            'a date/time': "Still need a date. Try 'today', 'this week', or 'next week'.",
-            'a location': "Still need a location. Try 'in Kensington' or name a campus building.",
-            'an organizer': "Still need an organizer. Try 'Arc', 'Library', or a club name.",
-            'some keywords/topics': "Still need a topic. Try words like 'tech', 'design', or 'social'."
-        }
-        return templates.get(priority, f"You can still add {priority} for sharper matches.")
-
-    def _build_followup_prompt(self, missing):
-        if missing:
-            return ("Need more ideas? Add one of those details or ask for 'more events'. "
-                    "You can also say 'remember this' once you're happy with the filters.")
-        return ("Want something else? Ask for details (e.g., 'tell me about number 2'), "
-                "say 'remember this' to save these filters, or try 'reset except date' to tweak them.")
+    def _build_followup_prompt(self):
+        # Always show the action prompt (missing prompts are disabled)
+        # Note: Details prompt and refine/reset prompt are now in _format_search_results
+        return None
 
     @staticmethod
     def _humanize_value(value):
@@ -460,20 +674,24 @@ class ConversationManager:
         if total > shown:
             remaining = total - shown
             label = "event" if remaining == 1 else "events"
-            return f"{remaining} more {label} available. Say 'more events' to see the full list."
+            return f"There {'is' if remaining == 1 else 'are'} {remaining} more {label}. Say 'more events' to see them all."
         return ""
 
     def _build_results_header(self, filter_map, removed_filters=None):
-        filters_text = self._format_filter_acknowledgment(filter_map)
-        filters_text = filters_text.replace("Filters set: ", "")
-        if not filters_text or filters_text.startswith("No filters"):
+        filters_text = self._format_filter_summary(filter_map)
+        if not filters_text:
             filters_text = "your request"
 
-        header = f"Here are events closest matching {filters_text}."
+        header = f"Here are events matching {filters_text}:"
         if removed_filters:
-            removed_text = ", ".join(
-                f"{item['type']}='{item['value']}'" for item in removed_filters)
-            header += f" Removed {removed_text}."
+            # Format removed filters naturally
+            removed_parts = []
+            for item in removed_filters:
+                filter_type = item['type'].replace('_', ' ')
+                removed_parts.append(f"{filter_type} '{item['value']}'")
+
+            removed_text = " and ".join(removed_parts) if len(removed_parts) <= 2 else ", ".join(removed_parts[:-1]) + f", and {removed_parts[-1]}"
+            header = f"I couldn't find exact matches, so here are events close to {filters_text} (I relaxed the {removed_text} filter):"
         return header
 
     def _parse_except_filter(self, user_input):
@@ -524,7 +742,7 @@ class ConversationManager:
         ack = self._format_filter_acknowledgment(filter_map)
         missing = self._missing_required_filters(filter_map)
         missing_line = self._build_missing_prompt(missing)
-        followup_line = self._build_followup_prompt(missing)
+        followup_line = self._build_followup_prompt()
 
         results = self._search_events()
         self._reset_paging(results)

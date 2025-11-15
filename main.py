@@ -3,8 +3,38 @@ Society Scout - Main Entry Point
 UNSW Event Discovery Chatbot
 """
 
+import sys
+import time
 from data import EventDatabase
 from chatbot.conversation import ConversationManager
+
+def typing_effect(text):
+    """
+    Display text with typing animation effect.
+    Allocates 3 seconds for every 150 characters.
+
+    Args:
+        text: The text to display
+    """
+    if not text:
+        return
+
+    # Calculate duration: 3 seconds per 150 characters
+    duration = (len(text) / 150) * 3
+
+    # Calculate delay per character to fit within duration
+    delay_per_char = duration / len(text)
+
+    for char in text:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        time.sleep(delay_per_char)
+
+        # Add extra pause after sentence-ending punctuation
+        if char in '.?':
+            time.sleep(0.3)
+
+    print()  # New line at the end
 
 def main():
     """Main function to run the chatbot"""
@@ -22,8 +52,8 @@ def main():
     conversation = ConversationManager(event_db)
 
     # Start conversation
-    print("Chatbot: Hi there! I can help you find events happening at the university.")
-    print("         What are you looking for?")
+    print("Chatbot: ", end="")
+    typing_effect("Hi there! I can help you find events happening at the university.\n         What are you looking for?")
     print()
     print("(Type 'quit' or 'exit' to end the conversation)")
     print("-" * 60)
@@ -37,7 +67,8 @@ def main():
         # Check for exit
         if user_input.lower() in ['quit', 'exit', 'bye']:
             print()
-            print("Chatbot: Thanks for using Society Scout! Have a great day!")
+            print("Chatbot: ", end="")
+            typing_effect("Thanks for using Society Scout! Have a great day!")
             break
 
         if not user_input:
@@ -46,9 +77,10 @@ def main():
         # Process message
         response = conversation.process_message(user_input)
 
-        # Display response
+        # Display response with typing effect
         print()
-        print(f"Chatbot: {response}")
+        print("Chatbot: ", end="")
+        typing_effect(response)
         print()
         print("-" * 60)
         print()
