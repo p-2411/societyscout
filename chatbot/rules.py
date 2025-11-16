@@ -37,10 +37,22 @@ class ChatbotRules:
         'sport', 'sports', 'fitness', 'yoga', 'wellness', 'mental', 'mindfulness',
         'meditation', 'dance', 'running', 'soccer', 'basketball', 'volleyball',
         # Food & Drink
-        'food', 'cooking', 'baking', 'coffee', 'wine', 'dining', 'culinary',
-        # Other relevant topics
+        'food', 'cooking', 'baking', 'coffee', 'wine', 'dining', 'culinary', 'dumplings',
+        # Outdoor & Activities
+        'outdoor', 'hiking', 'beach', 'picnic', 'nature', 'camping', 'adventure',
+        'motorcycle', 'ride', 'scenic', 'walking', 'swimming',
+        # Event-specific tags
+        'party', 'celebration', 'awards', 'graduation', 'year-end', 'festive', 'holiday',
+        'bbq', 'fundraiser', 'marathon', 'competition', 'tournament', 'championships',
+        'collaboration', 'teamwork', 'networking',
+        # Gaming & Entertainment
+        'board games', 'tabletop', 'rpg', 'pokemon', 'nintendo', 'gaming',
+        # Academic Support
         'student', 'study', 'academic', 'exam', 'tutorial', 'session', 'training',
-        'competition', 'hackathon', 'showcase', 'exhibition', 'conference', 'panel'
+        'revision', 'mock', 'prep', 'gamsat', 'finals',
+        # Other relevant topics
+        'hackathon', 'showcase', 'exhibition', 'conference', 'panel', 'seminar',
+        'relaxation', 'stress', 'casual', 'free', 'online'
     ]
     FILLER_WORDS = [
         # Articles
@@ -303,6 +315,10 @@ class ChatbotRules:
         negative_phrases = ['no', 'nah', 'nope', 'not really', 'no thanks', 'no thank you']
         if normalized in negative_phrases or any(phrase in normalized for phrase in negative_phrases):
             return 'negative_response'
+
+        # Language change intent
+        if 'language' in normalized or '语言' in normalized or 'langue' in normalized:
+            return 'change_language'
 
         # Help intent
         for word in tokens:

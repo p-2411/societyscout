@@ -1,184 +1,565 @@
 {
   "events": [
     {
-      "id": "evt001",
-      "title": "Marketing Workshop: Digital Strategies",
-      "type": "workshop",
-      "description": "Learn about digital marketing strategies and social media management for businesses",
-      "date": "2025-10-28",
-      "time": "14:00",
-      "location": "Quadrangle Building G055",
-      "organizer": "founders",
-      "club_name": null,
-      "tags": ["marketing", "digital", "business", "social media"],
-      "registration_link": "https://events.unsw.edu.au/marketing-workshop",
-      "capacity": 50,
-      "cost": "free"
+      "event": {
+        "id": "45929",
+        "title": "Wandersoc Goes To: Mount Elliot Walk with MotoSoc",
+        "type": "other",
+        "description": "Hard difficulty hiking trip to Mount Elliot with 11.16km distance and 380m elevation. Departing from Central Station and arriving at Lisarow. Collaborative event between WanderSoc and MotoSoc.",
+        "date": "2025-11-16",
+        "time": "09:20:00",
+        "location": "Central Station - Meeting at Central Grand Concourse Food Market",
+        "organizer": "club",
+        "club_name": "WanderSoc",
+        "tags": ["hiking", "outdoor", "collaboration", "mount elliot", "fitness", "nature"],
+        "registration_link": "https://www.facebook.com/share/17eRxSm9D8/",
+        "capacity": null,
+        "cost": "free"
+      }
     },
     {
-      "id": "evt002",
-      "title": "Python Coding Bootcamp",
-      "type": "workshop",
-      "description": "Beginner-friendly introduction to Python programming",
-      "date": "2025-10-29",
-      "time": "10:00",
-      "location": "CSE Building K17 Seminar Room",
-      "organizer": "club",
-      "club_name": "UNSW Computing Society (CompSoc)",
-      "tags": ["coding", "python", "programming", "tech"],
-      "registration_link": "https://compsoc.org.au/events",
-      "capacity": 40,
-      "cost": "free for members, $5 non-members"
+      "event": {
+        "id": "45425",
+        "title": "MotoSoc x WanderSoc: Ride & Roam at Mt Elliot",
+        "type": "social",
+        "description": "Motorcycle ride to Mt Elliot with scenic routes through Wiseman's Ferry and Heritage Valley Cafe, ending at St John Lookout. Collaboration between MotoSoc and WanderSoc.",
+        "date": "2025-11-16",
+        "time": "10:00:00",
+        "location": "Meeting at 7-Eleven West Pennant Hills (552 Pennant Hills Rd), destination St John Lookout",
+        "organizer": "club",
+        "club_name": "MotoSoc",
+        "tags": ["motorcycle", "ride", "outdoor", "scenic", "collaboration"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
     },
     {
-      "id": "evt003",
-      "title": "Mental Health & Wellbeing Session",
-      "type": "seminar",
-      "description": "Strategies for managing stress and maintaining mental health during university",
-      "date": "2025-10-30",
-      "time": "15:00",
-      "location": "Library Annexe",
-      "organizer": "arc",
-      "club_name": null,
-      "tags": ["wellbeing", "mental health", "stress", "health"],
-      "registration_link": "https://arc.unsw.edu.au/wellbeing",
-      "capacity": 30,
-      "cost": "free"
+      "event": {
+        "id": "44860",
+        "title": "ADSOC x SCA Presents: Campus Clash",
+        "type": "social",
+        "description": "12-hour charity marathon on campus with hourly challenges, mini-games, and creative contests. Teams compete for points and mystery prizes worth up to $200 while raising money for Save the Children Australia.",
+        "date": "2025-11-16",
+        "time": "10:00:00",
+        "location": "UNSW, Kensington NSW",
+        "organizer": "club",
+        "club_name": "ADSOC",
+        "tags": ["charity", "competition", "games", "marathon", "fundraiser", "save the children"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "$8.45"
+      }
     },
     {
-      "id": "evt004",
-      "title": "Networking Night: Meet Industry Professionals",
-      "type": "networking",
-      "description": "Connect with alumni and industry professionals from various fields",
-      "date": "2025-10-31",
-      "time": "18:00",
-      "location": "Roundhouse",
-      "organizer": "arc",
-      "club_name": null,
-      "tags": ["networking", "career", "industry", "professionals", "alumni"],
-      "registration_link": "https://arc.unsw.edu.au/networking-night",
-      "capacity": 100,
-      "cost": "free"
+      "event": {
+        "id": "41273",
+        "title": "Twilight Isles T3W9",
+        "type": "other",
+        "description": "Fortnightly D&D West Marches-style campaign session. Check discord for more information about the ongoing campaign.",
+        "date": "2025-11-16",
+        "time": "12:00:00",
+        "location": "UNSW Sydney",
+        "organizer": "club",
+        "club_name": "UNSW Tabletop Gaming Society",
+        "tags": ["dungeons and dragons", "d&d", "tabletop", "rpg", "gaming", "campaign"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
     },
     {
-      "id": "evt005",
-      "title": "Halloween Party",
-      "type": "party",
-      "description": "Annual Halloween celebration with music, food, and costume competition",
-      "date": "2025-10-31",
-      "time": "20:00",
-      "location": "Roundhouse Main Hall",
-      "organizer": "arc",
-      "club_name": null,
-      "tags": ["halloween", "party", "social", "music", "celebration"],
-      "registration_link": "https://arc.unsw.edu.au/halloween",
-      "capacity": 200,
-      "cost": "$10"
+      "event": {
+        "id": "45895",
+        "title": "End of Year Picnic",
+        "type": "social",
+        "description": "Relaxing beach picnic with canvas painting session to de-stress from assignments. No painting experience needed. Art supplies and snacks provided.",
+        "date": "2025-11-16",
+        "time": "16:00:00",
+        "location": "Coogee Beach",
+        "organizer": "club",
+        "club_name": "UNSW Student Society",
+        "tags": ["beach", "picnic", "painting", "art", "relaxation", "end of year"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
     },
     {
-      "id": "evt006",
-      "title": "Study Skills Workshop",
-      "type": "workshop",
-      "description": "Improve your study techniques and time management skills",
-      "date": "2025-11-01",
-      "time": "13:00",
-      "location": "Library Training Room",
-      "organizer": "library",
-      "club_name": null,
-      "tags": ["study", "skills", "academic", "time management"],
-      "registration_link": "https://library.unsw.edu.au/workshops",
-      "capacity": 25,
-      "cost": "free"
+      "event": {
+        "id": "44702",
+        "title": "Journey Through a Thousand Years of China",
+        "type": "social",
+        "description": "2025 CSA Year-End Celebration at the Chinese Garden of Friendship in Darling Harbour.",
+        "date": "2025-11-16",
+        "time": "18:00:00",
+        "location": "Chinese Garden of Friendship, Harbour Street, Darling Harbour",
+        "organizer": "club",
+        "club_name": "CSA (Chinese Students Association)",
+        "tags": ["cultural", "year-end", "celebration", "chinese culture", "social"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
     },
     {
-      "id": "evt007",
-      "title": "Startup Pitch Competition",
-      "type": "meetup",
-      "description": "Watch student entrepreneurs pitch their startup ideas to judges",
-      "date": "2025-11-02",
-      "time": "16:00",
-      "location": "UNSW Founders Building",
-      "organizer": "founders",
-      "club_name": null,
-      "tags": ["startup", "entrepreneurship", "business", "innovation", "pitch"],
-      "registration_link": "https://founders.unsw.edu.au/pitch",
-      "capacity": 80,
-      "cost": "free"
+      "event": {
+        "id": "41450",
+        "title": "D2MG T3 Week 10 Dance Classes",
+        "type": "workshop",
+        "description": "Weekly dance classes teaching House, Breaking, Girls Style, Popping, and Hip Hop fundamentals. Includes Freestyle Team session for members to practice and share moves.",
+        "date": "2025-11-17",
+        "time": "08:00:00",
+        "location": "Tyree Energy Technologies Building & Science and Engineering Building",
+        "organizer": "club",
+        "club_name": "D2MG (Dance 2 Music Generation)",
+        "tags": ["dance", "house", "breaking", "hip hop", "popping", "freestyle", "workshop"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "paid (payment in person)"
+      }
     },
     {
-      "id": "evt008",
-      "title": "3D Printing Workshop",
-      "type": "workshop",
-      "description": "Hands-on introduction to 3D printing and design",
-      "date": "2025-11-03",
-      "time": "11:00",
-      "location": "Makerspace",
-      "organizer": "makerspace",
-      "club_name": null,
-      "tags": ["3d printing", "design", "tech", "making", "hands-on"],
-      "registration_link": "https://makerspace.unsw.edu.au/events",
-      "capacity": 15,
-      "cost": "free"
+      "event": {
+        "id": "42442",
+        "title": "Daily Boards",
+        "type": "other",
+        "description": "Daily casual board games available between 9am and 5pm at the Quadrangle. Drop by anytime for fun games.",
+        "date": "2025-11-17",
+        "time": "09:00:00",
+        "location": "Quadrangle Building, College Road, Kensington",
+        "organizer": "club",
+        "club_name": "UNSW Board Games Society",
+        "tags": ["board games", "casual", "daily", "social", "gaming"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
     },
     {
-      "id": "evt009",
-      "title": "International Students Coffee Catchup",
-      "type": "social",
-      "description": "Meet other international students and make friends over coffee",
-      "date": "2025-11-04",
-      "time": "14:00",
-      "location": "Quad Lawn (outdoor)",
-      "organizer": "club",
-      "club_name": "UNSW International Students Society",
-      "tags": ["international", "social", "coffee", "friends", "networking"],
-      "registration_link": "https://www.arc.unsw.edu.au/clubs/international",
-      "capacity": 50,
-      "cost": "free"
+      "event": {
+        "id": "45503",
+        "title": "Study and Snack",
+        "type": "workshop",
+        "description": "Study session for media students to work on final assignments together. UNSW Media Lecturer Tara McLennan will be available to answer questions, especially about Media, Society and Politics final essay.",
+        "date": "2025-11-17",
+        "time": "10:00:00",
+        "location": "Mathews Building Room 214",
+        "organizer": "club",
+        "club_name": "MediaSoc",
+        "tags": ["study", "media", "assignments", "exam prep", "academic support"],
+        "registration_link": "https://forms.office.com/Pages/ResponsePage.aspx?id=pM_2PxXn20i44Qhnufn7oyygfLmvSihJvm35IZatrZFUN1M4WTlWMTVDQVlIOE1ZQkJTQ0dSWUNFSS4u",
+        "capacity": null,
+        "cost": "free"
+      }
     },
     {
-      "id": "evt010",
-      "title": "Guest Lecture: AI and the Future of Work",
-      "type": "lecture",
-      "description": "Industry expert discusses how artificial intelligence is transforming the workplace",
-      "date": "2025-11-05",
-      "time": "17:00",
-      "location": "CLB 7",
-      "organizer": "unsw",
-      "club_name": null,
-      "tags": ["ai", "artificial intelligence", "future", "work", "technology", "lecture"],
-      "registration_link": "https://events.unsw.edu.au/ai-lecture",
-      "capacity": 150,
-      "cost": "free"
+      "event": {
+        "id": "45193",
+        "title": "TCSA: Dumplings on Campus",
+        "type": "social",
+        "description": "Tea and dumplings (pork and chives & vegetarian) on campus celebrating Teochew culture. Come enjoy authentic Teochew food with friends.",
+        "date": "2025-11-17",
+        "time": "12:00:00",
+        "location": "Library Lawn, Kensington",
+        "organizer": "club",
+        "club_name": "TCSA (Teochew Cultural Society)",
+        "tags": ["food", "cultural", "dumplings", "tea", "teochew", "social"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
     },
     {
-      "id": "evt011",
-      "title": "Yoga and Meditation Session",
-      "type": "social",
-      "description": "Relaxing yoga and meditation for stress relief",
-      "date": "2025-11-06",
-      "time": "08:00",
-      "location": "Village Green",
-      "organizer": "arc",
-      "club_name": null,
-      "tags": ["yoga", "meditation", "wellbeing", "health", "exercise"],
-      "registration_link": "https://arc.unsw.edu.au/yoga",
-      "capacity": 30,
-      "cost": "free"
+      "event": {
+        "id": "41077",
+        "title": "RunSoc Monday Training T3 Week 10",
+        "type": "other",
+        "description": "Weekly interval training group sessions suitable for runners of all levels. Achieve fitness goals, prepare for races, and improve PB times while making new friends.",
+        "date": "2025-11-17",
+        "time": "17:00:00",
+        "location": "Sam Cracknell Pavilion (H8), Kensington",
+        "organizer": "club",
+        "club_name": "RunSoc",
+        "tags": ["running", "fitness", "training", "intervals", "sports"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
     },
     {
-      "id": "evt012",
-      "title": "Photography Walk Around Campus",
-      "type": "social",
-      "description": "Join fellow photography enthusiasts for a campus photo walk",
-      "date": "2025-11-07",
-      "time": "15:00",
-      "location": "Meet at Library Lawn",
-      "organizer": "club",
-      "club_name": "UNSW Photography Society",
-      "tags": ["photography", "creative", "art", "campus", "social"],
-      "registration_link": "https://www.arc.unsw.edu.au/clubs/photography",
-      "capacity": 20,
-      "cost": "free for members"
+      "event": {
+        "id": "44288",
+        "title": "Debating Internals - Week 10",
+        "type": "other",
+        "description": "Weekly debating practice session followed by social gathering at The Regent Hotel with free food and drinks available for purchase.",
+        "date": "2025-11-17",
+        "time": "18:00:00",
+        "location": "Webster Theatre A",
+        "organizer": "club",
+        "club_name": "UNSW Debating Society",
+        "tags": ["debating", "public speaking", "competition", "social"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "42450",
+        "title": "Weekly Online Tournament",
+        "type": "other",
+        "description": "Weekly online gaming tournament for board game enthusiasts.",
+        "date": "2025-11-17",
+        "time": "20:00:00",
+        "location": "Online Event",
+        "organizer": "club",
+        "club_name": "UNSW Board Games Society",
+        "tags": ["online", "tournament", "gaming", "board games", "competition"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "41087",
+        "title": "RunSoc Bagels T3 Week 10",
+        "type": "other",
+        "description": "Early morning run with 8km and 12km route options, followed by bagels. Bag storage available. Everyone welcome.",
+        "date": "2025-11-18",
+        "time": "07:00:00",
+        "location": "Haven Coffee - Darling Quarter, Harbour Street, Sydney",
+        "organizer": "club",
+        "club_name": "RunSoc",
+        "tags": ["running", "fitness", "morning run", "social", "breakfast"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "46084",
+        "title": "T3 EWB Social BBQ",
+        "type": "social",
+        "description": "Free sausage sizzle and hash browns at Village Green beside Homeground. Come grab a free meal and hang around for good vibes during pre-exam stress period.",
+        "date": "2025-11-18",
+        "time": "12:00:00",
+        "location": "Village Green, beside Homeground, UNSW",
+        "organizer": "club",
+        "club_name": "EWB UNSW (Engineers Without Borders)",
+        "tags": ["bbq", "free food", "social", "sausage sizzle", "community"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "45336",
+        "title": "EGM (Extraordinary General Meeting)",
+        "type": "meetup",
+        "description": "Extraordinary General Meeting for GolfSoc. Executive and Director positions now open for applications.",
+        "date": "2025-11-18",
+        "time": "17:00:00",
+        "location": "UNSW, Quadrangle Building, G205",
+        "organizer": "club",
+        "club_name": "GolfSoc",
+        "tags": ["meeting", "elections", "executive", "governance"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "45998",
+        "title": "ISOC Awards Night 2025",
+        "type": "social",
+        "description": "Annual awards ceremony celebrating achievements in Qur'an Memorization & Recitation Competition and Futsal Competition. Food and light refreshments provided in a warm, welcoming atmosphere.",
+        "date": "2025-11-18",
+        "time": "17:30:00",
+        "location": "Madina Room, Level 3, Squarehouse, UNSW",
+        "organizer": "club",
+        "club_name": "ISOC (Islamic Society)",
+        "tags": ["awards", "ceremony", "quran", "futsal", "islamic", "community"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "45670",
+        "title": "Fraser's x MSS: GAMSAT Section 2 Mock Session",
+        "type": "workshop",
+        "description": "Full Section 2 GAMSAT mock exam in exam conditions with individualized feedback from experienced GAMSAT tutors. Perfect for beginners or those wanting more practice. Limited to 35 spots.",
+        "date": "2025-11-18",
+        "time": "18:00:00",
+        "location": "Mathews Building Room 105",
+        "organizer": "club",
+        "club_name": "MedSciSoc",
+        "tags": ["gamsat", "exam prep", "medical", "tutoring", "mock exam", "feedback"],
+        "registration_link": "https://forms.gle/kNgSmhstJkyxCeqXA",
+        "capacity": 35,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "45667",
+        "title": "Study so Matcha",
+        "type": "workshop",
+        "description": "Study session with matcha, snacks and focused vibes to help with finals preparation. Collaborative event between MatchaSoc, CEUS, FSA, BESS and DietSoc.",
+        "date": "2025-11-19",
+        "time": "09:00:00",
+        "location": "Mathews Building Rooms 107-108",
+        "organizer": "club",
+        "club_name": "MatchaSoc",
+        "tags": ["study", "matcha", "finals", "exam prep", "collaboration"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "$4.80 - $8.45"
+      }
+    },
+    {
+      "event": {
+        "id": "46017",
+        "title": "Wednesday FREE COFFEE Coffee Catch-Up",
+        "type": "social",
+        "description": "End of term celebration with free coffee/drink and cake. Located under the covered walkway between the library and Mathews Building - look for the green banner.",
+        "date": "2025-11-19",
+        "time": "11:00:00",
+        "location": "Library Lawn (covered walkway), Kensington",
+        "organizer": "club",
+        "club_name": "UNSW Student Society",
+        "tags": ["coffee", "free", "social", "end of term", "celebration"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "45658",
+        "title": "The Pitstop - Social Dinner",
+        "type": "social",
+        "description": "MotoSoc social dinner at Korean BBQ buffet. Meet fellow riders, share stories, and enjoy unlimited KBBQ. Ticket covers base buffet cost, additional drinks/snacks at own expense.",
+        "date": "2025-11-19",
+        "time": "18:00:00",
+        "location": "Butcher's Buffet Strathfield (11 Parnell St, Strathfield)",
+        "organizer": "club",
+        "club_name": "MotoSoc",
+        "tags": ["dinner", "kbbq", "social", "buffet", "motorcycle community"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "$52.34"
+      }
+    },
+    {
+      "event": {
+        "id": "43842",
+        "title": "Coffee Night Week 10",
+        "type": "meetup",
+        "description": "Weekly college meeting covering upcoming events, community concerns, academic information, and important updates from Dean, staff, and house committee.",
+        "date": "2025-11-19",
+        "time": "18:30:00",
+        "location": "Gate Five Avenue, Randwick",
+        "organizer": "other",
+        "club_name": "Residential College",
+        "tags": ["meeting", "college", "community", "updates"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "45847",
+        "title": "Cup in Colombo 2025 T3W10",
+        "type": "social",
+        "description": "Weekly in-person meetup featuring wide variety of teas and coffees from Australia and around the globe. Bottomless free drinks for all members. Socialize and learn about specialty beverages.",
+        "date": "2025-11-20",
+        "time": "13:00:00",
+        "location": "Colombo Foyer B16, UNSW",
+        "organizer": "club",
+        "club_name": "TACsoc (Tea and Coffee Society)",
+        "tags": ["tea", "coffee", "social", "tasting", "beverages", "bottomless"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "members free"
+      }
+    },
+    {
+      "event": {
+        "id": "46018",
+        "title": "Thursday FREE COFFEE Coffee Catch-Up",
+        "type": "social",
+        "description": "End of term celebration with free drink and cake. Located under the covered walkway between library and Mathews Building - look for green banner.",
+        "date": "2025-11-20",
+        "time": "13:00:00",
+        "location": "Library Lawn (covered walkway), Kensington",
+        "organizer": "club",
+        "club_name": "UNSW Student Society",
+        "tags": ["coffee", "free", "social", "end of term", "celebration"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "45789",
+        "title": "Finals Study/Revision Cafe - HOLIDAY EDITION",
+        "type": "workshop",
+        "description": "Focused study space with festive theme including peppermint hot chocolate, energy drinks, and holiday treats. Productivity cafe format where students set completion goals. Prizes for task completion. Collaboration with PharmSoc.",
+        "date": "2025-11-20",
+        "time": "13:00:00",
+        "location": "Morven Brown Building, Kensington",
+        "organizer": "club",
+        "club_name": "UNSW Student Society",
+        "tags": ["study", "finals", "exam prep", "festive", "productivity", "holiday theme"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "42091",
+        "title": "Nationals Melbourne 2025",
+        "type": "other",
+        "description": "Multi-day trip to Melbourne for performing dance and cheerleading routines at Nationals competition. Includes team bonding exercises and supporting team members.",
+        "date": "2025-11-20",
+        "time": "14:00:00",
+        "location": "399 Little Lonsdale St, Melbourne VIC",
+        "organizer": "club",
+        "club_name": "UNSW Dance/Cheer Team",
+        "tags": ["competition", "nationals", "dance", "cheerleading", "melbourne", "team trip"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "$231.00"
+      }
+    },
+    {
+      "event": {
+        "id": "45703",
+        "title": "Pokesoc Games Corner Term 3 Week 10",
+        "type": "social",
+        "description": "Weekly social meetup for playing multiplayer games on Nintendo Switches, board games, Pokemon card trading and battling, and more.",
+        "date": "2025-11-20",
+        "time": "16:00:00",
+        "location": "UNSW, Quadrangle Building",
+        "organizer": "club",
+        "club_name": "Pokesoc (Pokemon Society)",
+        "tags": ["pokemon", "gaming", "nintendo switch", "trading cards", "board games", "social"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "44768",
+        "title": "2025 T3 Week 10",
+        "type": "social",
+        "description": "Graduation celebration and reflection event for members. Share experiences from the past year and celebrate graduations.",
+        "date": "2025-11-20",
+        "time": "17:00:00",
+        "location": "Civil Engineering Building (H20), Kensington",
+        "organizer": "club",
+        "club_name": "UNSW Engineering Society",
+        "tags": ["graduation", "celebration", "reflection", "year end", "community"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "42038",
+        "title": "SocSoc WK10 Debate: Nietzsche",
+        "type": "seminar",
+        "description": "Philosophical debate on Friedrich Nietzsche and his controversial ideas including will to power, Overman, eternal return, and death of God. Discuss whether he was a genius, prophet, or charlatan.",
+        "date": "2025-11-20",
+        "time": "18:00:00",
+        "location": "Law Library 301, UNSW",
+        "organizer": "club",
+        "club_name": "Socratic Society",
+        "tags": ["philosophy", "debate", "nietzsche", "intellectual", "discussion"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "45791",
+        "title": "Beach Crawl",
+        "type": "social",
+        "description": "End of term celebration along Bondi to Coogee coastal walk. Stop at six beaches for swims (Bondi, Tamarama, Bronte, Clovelly, Gordon's Bay, Coogee). Ice cream and food options available along the route.",
+        "date": "2025-11-21",
+        "time": "09:30:00",
+        "location": "Meet at South Bondi Beach",
+        "organizer": "club",
+        "club_name": "BIOSOC",
+        "tags": ["beach", "swimming", "coastal walk", "summer", "outdoor", "end of term"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "45915",
+        "title": "6th Year Graduation Lunch",
+        "type": "other",
+        "description": "Graduation lunch for 2025 cohort of 6th year medical students. Families and friends warmly invited to celebrate at Pacific Bay Resort.",
+        "date": "2025-11-21",
+        "time": "11:00:00",
+        "location": "Pacific Bay Resort, Bay Drive, Coffs Harbour",
+        "organizer": "club",
+        "club_name": "UNSW Medicine",
+        "tags": ["graduation", "medical students", "lunch", "celebration", "families"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "42217",
+        "title": "Musical Workshop 10",
+        "type": "workshop",
+        "description": "Weekly musical workshop and lunch gathering. Come jam out, chill out, and play music together in a relaxed environment.",
+        "date": "2025-11-21",
+        "time": "12:00:00",
+        "location": "Squarehouse 218, UNSW",
+        "organizer": "club",
+        "club_name": "UNSW Music Society",
+        "tags": ["music", "workshop", "jamming", "social", "instruments"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
+    },
+    {
+      "event": {
+        "id": "46049",
+        "title": "KEEBSOC BBQ",
+        "type": "social",
+        "description": "Free BBQ for mechanical keyboard enthusiasts. Enjoy food and discuss the best hobby - keyboards! Sign up to Keebsoc on Rubric Arc and present membership for free food.",
+        "date": "2025-11-21",
+        "time": "12:00:00",
+        "location": "Village Green BBQ, UNSW",
+        "organizer": "club",
+        "club_name": "KEEBSOC (Mechanical Keyboards Society)",
+        "tags": ["bbq", "keyboards", "mechanical keyboards", "free food", "social", "tech"],
+        "registration_link": null,
+        "capacity": null,
+        "cost": "free"
+      }
     }
   ]
 }

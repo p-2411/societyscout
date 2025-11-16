@@ -19,7 +19,9 @@ class EventDatabase:
         try:
             with open(self.data_file, 'r') as f:
                 data = json.load(f)
-                self.events = data.get('events', [])
+                raw_events = data.get('events', [])
+                # Extract the actual event data from nested structure
+                self.events = [item['event'] for item in raw_events if 'event' in item]
         except FileNotFoundError:
             print(f"Warning: Events file '{self.data_file}' not found")
             self.events = []
@@ -59,8 +61,8 @@ class EventDatabase:
             elif filter_type == 'location':
                 results = [e for e in results if filter_value in e['location'].lower()]
 
-            # elif filter_type == 'keyword':
-            #     results = self._filter_by_keyword(results, filter_value)
+            elif filter_type == 'keyword':
+                results = self._filter_by_keyword(results, filter_value)
 
         return results
 
@@ -90,13 +92,13 @@ class EventDatabase:
         return [e for e in events
                 if datetime.fromisoformat(e['date']).date() == target_date]
 
-    # def _filter_by_keyword(self, events, keyword):
-    #     """Filter events by keyword (searches title, description, and tags)"""
-    #     return [e for e in events if (
-    #         keyword in e['title'].lower() or
-    #         keyword in e['description'].lower() or
-    #         any(keyword in tag.lower() for tag in e.get('tags', []))
-    #     )]
+    def _filter_by_keyword(self, events, keyword):
+        """Filter events by keyword (searches title, description, and tags)"""
+        return [e for e in events if (
+            keyword in e.get('title', '').lower() or
+            keyword in e.get('description', '').lower() or
+            any(keyword in tag.lower() for tag in e.get('tags', []))
+        )]
 
     def get_event_by_id(self, event_id):
         """Get a specific event by ID"""
