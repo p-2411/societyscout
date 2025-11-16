@@ -17,38 +17,38 @@ class ChatbotRules:
     # Known topic keywords (frame-slot approach for topic extraction)
     TOPIC_KEYWORDS = [
         # Technology & Computing
-        'code', 'coding', 'program', 'programming', 'tech', 'technology', 'computer', 'software', 'hardware',
+        'code', 'program', 'tech', 'technology', 'computer', 'software', 'hardware',
         'python', 'java', 'javascript', 'web', 'app', 'mobile', 'ai', 'ml', 'data', 'cyber',
-        'security', 'blockchain', 'game', 'gaming', 'vr', 'ar', 'cloud', 'database',
+        'security', 'blockchain', 'game', 'vr', 'ar', 'cloud', 'database',
         # Design & Creative
         'design', 'graphic', 'ui', 'ux', 'art', 'creative', 'photography', 'video',
-        'animation', 'film', 'music', 'theater', 'performance', 'draw', 'drawing', 'paint', 'painting',
+        'animation', 'film', 'music', 'theater', 'performance', 'draw', 'paint',
         # Business & Professional
-        'business', 'entrepreneurship', 'startup', 'market', 'marketing', 'finance', 'account', 'accounting',
-        'consult', 'consulting', 'leadership', 'management', 'career', 'professional', 'internship',
-        'network', 'networking', 'resume', 'interview',
+        'business', 'entrepreneurship', 'startup', 'market', 'finance', 'account',
+        'consult', 'leadership', 'management', 'career', 'professional', 'internship',
+        'network', 'resume', 'interview',
         # Academic & Science
-        'research', 'science', 'engineer', 'engineering', 'math', 'physics', 'chemistry', 'biology',
+        'research', 'science', 'engineer', 'math', 'physics', 'chemistry', 'biology',
         'medicine', 'health', 'psychology', 'law', 'history', 'literature', 'language',
         # Social & Cultural
         'culture', 'cultural', 'diversity', 'community', 'volunteer', 'charity', 'social',
         'environment', 'sustainability', 'activism', 'politics', 'debate', 'discussion',
         # Sports & Wellness
-        'sport', 'sports', 'fitness', 'yoga', 'wellness', 'mental', 'mindfulness',
-        'meditation', 'dance', 'run', 'running', 'soccer', 'basketball', 'volleyball',
+        'sport', 'fitness', 'yoga', 'wellness', 'mental', 'mindfulness',
+        'meditation', 'dance', 'run', 'soccer', 'basketball', 'volleyball',
         # Food & Drink
-        'food', 'cook', 'cooking', 'bake', 'baking', 'coffee', 'wine', 'dine', 'dining', 'culinary', 'dumplings',
+        'food', 'cook', 'bake', 'coffee', 'wine', 'dine', 'culinary', 'dumpling',
         # Outdoor & Activities
-        'outdoor', 'hike', 'hiking', 'beach', 'picnic', 'nature', 'camp', 'camping', 'adventure',
-        'motorcycle', 'ride', 'scenic', 'walk', 'walking', 'swim', 'swimming',
+        'outdoor', 'hike', 'beach', 'picnic', 'nature', 'camp', 'adventure',
+        'motorcycle', 'ride', 'scenic', 'walk', 'swim',
         # Event-specific tags
-        'party', 'celebration', 'awards', 'graduation', 'year-end', 'festive', 'holiday',
-        'bbq', 'fundraiser', 'marathon', 'competition', 'tournament', 'championships',
+        'party', 'celebration', 'award', 'graduation', 'year-end', 'festive', 'holiday',
+        'bbq', 'fundraiser', 'marathon', 'competition', 'tournament', 'championship',
         'collaboration', 'teamwork',
         # Gaming & Entertainment
-        'board games', 'tabletop', 'rpg', 'pokemon', 'nintendo',
+        'board game', 'tabletop', 'rpg', 'pokemon', 'nintendo',
         # Academic Support
-        'student', 'study', 'academic', 'exam', 'tutorial', 'session', 'train', 'training',
+        'student', 'study', 'academic', 'exam', 'tutorial', 'session', 'train',
         'revision', 'mock', 'prep', 'gamsat', 'finals',
         # Other relevant topics
         'hackathon', 'showcase', 'exhibition', 'conference', 'panel', 'seminar',
@@ -250,21 +250,25 @@ class ChatbotRules:
         # Only keep words that are either:
         # 1. In our TOPIC_KEYWORDS list (known relevant topics)
         # 2. Longer than 4 characters and not in exclusion lists (potential domain-specific terms)
-        potential_keywords_original = [w for w in original_filtered
-                                      if w not in ChatbotRules.EVENT_TYPES
-                                      and w not in ChatbotRules.ORGANIZERS
-                                      and w not in ChatbotRules.DATE_WORDS
-                                      and w not in ChatbotRules.SEARCH_WORDS
-                                      and w not in ChatbotRules.GREETING_WORDS
-                                      and not w.isdigit()]
 
-        potential_keywords_singular = [w for w in filtered_words
-                                      if w not in ChatbotRules.EVENT_TYPES
-                                      and w not in ChatbotRules.ORGANIZERS
-                                      and w not in ChatbotRules.DATE_WORDS
-                                      and w not in ChatbotRules.SEARCH_WORDS
-                                      and w not in ChatbotRules.GREETING_WORDS
-                                      and not w.isdigit()]
+        # Build parallel lists by checking exclusions on BOTH forms to maintain alignment
+        potential_keywords_original = []
+        potential_keywords_singular = []
+
+        for orig, sing in zip(original_filtered, filtered_words):
+            # A word should be excluded if EITHER form matches exclusion lists
+            should_exclude = (
+                orig in ChatbotRules.EVENT_TYPES or sing in ChatbotRules.EVENT_TYPES or
+                orig in ChatbotRules.ORGANIZERS or sing in ChatbotRules.ORGANIZERS or
+                orig in ChatbotRules.DATE_WORDS or sing in ChatbotRules.DATE_WORDS or
+                orig in ChatbotRules.SEARCH_WORDS or sing in ChatbotRules.SEARCH_WORDS or
+                orig in ChatbotRules.GREETING_WORDS or sing in ChatbotRules.GREETING_WORDS or
+                orig.isdigit() or sing.isdigit()
+            )
+
+            if not should_exclude:
+                potential_keywords_original.append(orig)
+                potential_keywords_singular.append(sing)
 
         # Validate keywords - check both original and singularized forms
         validated_keywords = []

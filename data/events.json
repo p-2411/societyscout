@@ -11,7 +11,7 @@
         "location": "Central Station - Meeting at Central Grand Concourse Food Market",
         "organizer": "club",
         "club_name": "WanderSoc",
-        "tags": ["hiking", "outdoor", "collaboration", "mount elliot", "fitness", "nature"],
+        "tags": ["hike", "outdoor", "collaboration", "mount elliot", "fitness", "nature"],
         "registration_link": "https://www.facebook.com/share/17eRxSm9D8/",
         "capacity": null,
         "cost": "free"
@@ -62,7 +62,7 @@
         "location": "UNSW Sydney",
         "organizer": "club",
         "club_name": "UNSW Tabletop Gaming Society",
-        "tags": ["dungeons and dragons", "d&d", "tabletop", "rpg", "gaming", "campaign"],
+        "tags": ["dungeons and dragons", "d&d", "tabletop", "rpg", "game", "campaign"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -79,7 +79,7 @@
         "location": "Coogee Beach",
         "organizer": "club",
         "club_name": "UNSW Student Society",
-        "tags": ["beach", "picnic", "painting", "art", "relaxation", "end of year"],
+        "tags": ["beach", "picnic", "paint", "art", "relaxation", "end of year"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -113,7 +113,7 @@
         "location": "Tyree Energy Technologies Building & Science and Engineering Building",
         "organizer": "club",
         "club_name": "D2MG (Dance 2 Music Generation)",
-        "tags": ["dance", "house", "breaking", "hip hop", "popping", "freestyle", "workshop"],
+        "tags": ["dance", "house", "break", "hip hop", "pop", "freestyle", "workshop"],
         "registration_link": null,
         "capacity": null,
         "cost": "paid (payment in person)"
@@ -130,7 +130,7 @@
         "location": "Quadrangle Building, College Road, Kensington",
         "organizer": "club",
         "club_name": "UNSW Board Games Society",
-        "tags": ["board games", "casual", "daily", "social", "gaming"],
+        "tags": ["board game", "casual", "daily", "social", "game"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -164,7 +164,7 @@
         "location": "Library Lawn, Kensington",
         "organizer": "club",
         "club_name": "TCSA (Teochew Cultural Society)",
-        "tags": ["food", "cultural", "dumplings", "tea", "teochew", "social"],
+        "tags": ["food", "cultural", "dumpling", "tea", "teochew", "social"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -181,7 +181,7 @@
         "location": "Sam Cracknell Pavilion (H8), Kensington",
         "organizer": "club",
         "club_name": "RunSoc",
-        "tags": ["running", "fitness", "training", "intervals", "sports"],
+        "tags": ["run", "fitness", "train", "interval", "sport"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -198,7 +198,7 @@
         "location": "Webster Theatre A",
         "organizer": "club",
         "club_name": "UNSW Debating Society",
-        "tags": ["debating", "public speaking", "competition", "social"],
+        "tags": ["debate", "public speaking", "competition", "social"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -215,7 +215,7 @@
         "location": "Online Event",
         "organizer": "club",
         "club_name": "UNSW Board Games Society",
-        "tags": ["online", "tournament", "gaming", "board games", "competition"],
+        "tags": ["online", "tournament", "game", "board game", "competition"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -232,7 +232,7 @@
         "location": "Haven Coffee - Darling Quarter, Harbour Street, Sydney",
         "organizer": "club",
         "club_name": "RunSoc",
-        "tags": ["running", "fitness", "morning run", "social", "breakfast"],
+        "tags": ["run", "fitness", "morning run", "social", "breakfast"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -368,7 +368,7 @@
         "location": "Gate Five Avenue, Randwick",
         "organizer": "other",
         "club_name": "Residential College",
-        "tags": ["meeting", "college", "community", "updates"],
+        "tags": ["meeting", "college", "community", "update"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -385,7 +385,7 @@
         "location": "Colombo Foyer B16, UNSW",
         "organizer": "club",
         "club_name": "TACsoc (Tea and Coffee Society)",
-        "tags": ["tea", "coffee", "social", "tasting", "beverages", "bottomless"],
+        "tags": ["tea", "coffee", "social", "taste", "beverage", "bottomless"],
         "registration_link": null,
         "capacity": null,
         "cost": "members free"
@@ -436,7 +436,7 @@
         "location": "399 Little Lonsdale St, Melbourne VIC",
         "organizer": "club",
         "club_name": "UNSW Dance/Cheer Team",
-        "tags": ["competition", "nationals", "dance", "cheerleading", "melbourne", "team trip"],
+        "tags": ["competition", "nationals", "dance", "cheerlead", "melbourne", "team trip"],
         "registration_link": null,
         "capacity": null,
         "cost": "$231.00"
@@ -453,7 +453,7 @@
         "location": "UNSW, Quadrangle Building",
         "organizer": "club",
         "club_name": "Pokesoc (Pokemon Society)",
-        "tags": ["pokemon", "gaming", "nintendo switch", "trading cards", "board games", "social"],
+        "tags": ["pokemon", "game", "nintendo switch", "trading card", "board game", "social"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -504,7 +504,7 @@
         "location": "Meet at South Bondi Beach",
         "organizer": "club",
         "club_name": "BIOSOC",
-        "tags": ["beach", "swimming", "coastal walk", "summer", "outdoor", "end of term"],
+        "tags": ["beach", "swim", "coastal walk", "summer", "outdoor", "end of term"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -521,7 +521,7 @@
         "location": "Pacific Bay Resort, Bay Drive, Coffs Harbour",
         "organizer": "club",
         "club_name": "UNSW Medicine",
-        "tags": ["graduation", "medical students", "lunch", "celebration", "families"],
+        "tags": ["graduation", "medical students", "lunch", "celebration", "family"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -538,7 +538,7 @@
         "location": "Squarehouse 218, UNSW",
         "organizer": "club",
         "club_name": "UNSW Music Society",
-        "tags": ["music", "workshop", "jamming", "social", "instruments"],
+        "tags": ["music", "workshop", "jam", "social", "instrument"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -555,7 +555,7 @@
         "location": "Village Green BBQ, UNSW",
         "organizer": "club",
         "club_name": "KEEBSOC (Mechanical Keyboards Society)",
-        "tags": ["bbq", "keyboards", "mechanical keyboards", "free food", "social", "tech"],
+        "tags": ["bbq", "keyboard", "mechanical keyboard", "free food", "social", "tech"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"

@@ -427,7 +427,7 @@ class ConversationManager:
         if not (ChatbotRules._contains_filter_tokens(tokens) or
                 any(keyword in tokens for keyword in ['event', 'events', 'activity', 'activities', 'find', 'search'])):
             existing = self.memory.get_filters()
-            current_filters = [f"{item['type']}={item['value']}" for item in existing]
+            current_filters = self._format_filters_naturally(existing)
             return self.fallbacks.handle_actionable_unknown(current_filters)
 
         filters = self.rules.normalize_input(user_input)
@@ -439,7 +439,7 @@ class ConversationManager:
 
         # Otherwise provide purpose reminder + actionable suggestions
         existing = self.memory.get_filters()
-        current_filters = [f"{item['type']}={item['value']}" for item in existing]
+        current_filters = self._format_filters_naturally(existing)
         return self.fallbacks.handle_actionable_unknown(current_filters)
 
     def _search_events(self):
@@ -635,6 +635,56 @@ class ConversationManager:
         filter_strs = [f"{f['type']}: {f['value']}" for f in filters]
         return ", ".join(filter_strs)
 
+    def _format_filters_naturally(self, filters):
+        """
+        Format filters in natural language instead of technical format.
+
+        Args:
+            filters: List of filter dictionaries with 'type' and 'value' keys
+
+        Returns:
+            List of naturally formatted filter strings
+        """
+        natural_filters = []
+
+        for item in filters:
+            filter_type = item['type']
+            value = item['value']
+
+            if filter_type == 'keyword':
+                # "keyword=hike" becomes "keywords are hike" or just "hike"
+                natural_filters.append(value)
+            elif filter_type == 'event_type':
+                # "event_type=workshop" becomes "event type is workshop"
+                natural_filters.append(f"event type is {value}")
+            elif filter_type == 'date':
+                # "date=tomorrow" becomes "date is tomorrow"
+                natural_filters.append(f"date is {value.replace('_', ' ')}")
+            elif filter_type == 'location':
+                # "location=library" becomes "location is library"
+                natural_filters.append(f"location is {value}")
+            elif filter_type == 'organizer':
+                # "organizer=Arc" becomes "organizer is Arc"
+                natural_filters.append(f"organizer is {value}")
+            else:
+                # Fallback for any other filter types
+                natural_filters.append(f"{filter_type.replace('_', ' ')} is {value}")
+
+        # Group keywords together if there are multiple
+        keyword_values = [item['value'] for item in filters if item['type'] == 'keyword']
+        if keyword_values:
+            # Remove individual keyword entries from natural_filters
+            natural_filters = [f for f in natural_filters if not any(kw == f for kw in keyword_values)]
+
+            # Add grouped keywords entry
+            if len(keyword_values) == 1:
+                natural_filters.append(f"keyword is {keyword_values[0]}")
+            else:
+                keywords_list = ", ".join(keyword_values[:-1]) + f", and {keyword_values[-1]}"
+                natural_filters.append(f"keywords are {keywords_list}")
+
+        return natural_filters
+
     def _collect_filter_map(self):
         filter_map = {
             'event_type': None,
@@ -660,7 +710,16 @@ class ConversationManager:
         if filter_map['event_type']:
             parts.append(f"{filter_map['event_type']} events")
         if filter_map['keywords']:
-            parts.append("about " + ", ".join(filter_map['keywords']))
+            # Use "about" only if there's an event_type, otherwise just list the keywords
+            if filter_map['event_type']:
+                parts.append("about " + ", ".join(filter_map['keywords']))
+            else:
+                # No event type, so keywords become the main subject
+                keywords_text = ", ".join(filter_map['keywords'])
+                if len(filter_map['keywords']) == 1:
+                    parts.append(f"{keywords_text} events")
+                else:
+                    parts.append(f"events about {keywords_text}")
         if filter_map['organizer']:
             parts.append(f"by {filter_map['organizer']}")
         if filter_map['location']:
