@@ -119,15 +119,21 @@ def main():
         # Get user input
         user_input = input("You: ").strip()
 
-        # Check for exit
-        if user_input.lower() in ['quit', 'exit', 'bye']:
-            print()
-            print("Chatbot: ", end="")
-            typing_effect("Thanks for using Society Scout! Have a great day!")
-            break
-
         if not user_input:
             continue
+
+        # Translate to English for exit command detection
+        user_input_english = conversation.translator.translate_to_english(user_input)
+
+        # Check for exit (check both original and translated)
+        exit_keywords = ['quit', 'exit', 'bye', 'goodbye', 'bye bye']
+        if user_input.lower() in exit_keywords or user_input_english.lower() in exit_keywords:
+            print()
+            print("Chatbot: ", end="")
+            # Translate goodbye message to user's language
+            goodbye_message = conversation.translator.translate("Thanks for using Society Scout! Have a great day!")
+            typing_effect(goodbye_message)
+            break
 
         # Process message
         response = conversation.process_message(user_input)

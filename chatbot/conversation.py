@@ -35,20 +35,24 @@ class ConversationManager:
         Returns:
             str: Bot's response
         """
-        # Store user message in history
+        # Store original user message in history
         self.memory.add_to_history('user', user_input)
 
-        # Check for greeting
-        has_greeting = self.rules.contains_greeting(user_input)
+        # Translate user input to English for processing (if in a different language)
+        user_input_english = self.translator.translate_to_english(user_input)
 
-        # Detect intent
-        intent = self.rules.detect_intent(user_input)
+        # Check for greeting (use English version for detection)
+        has_greeting = self.rules.contains_greeting(user_input_english)
+
+        # Detect intent (use English version for detection)
+        intent = self.rules.detect_intent(user_input_english)
 
         # Route to appropriate handler
         if intent == 'greeting':
             response = self._handle_greeting()
             self.awaiting_random_confirmation = False
         elif intent == 'change_language':
+            # Use original input to detect language keywords in any language
             response = self._handle_language_change(user_input)
             self.awaiting_random_confirmation = False
         elif intent == 'uncertainty':
@@ -73,19 +77,19 @@ class ConversationManager:
             response = self._handle_use_saved_filters()
             self.awaiting_random_confirmation = False
         elif intent == 'reset_except':
-            response = self._handle_reset_except(user_input)
+            response = self._handle_reset_except(user_input_english)
             self.awaiting_random_confirmation = False
         elif intent == 'find_event':
-            response = self._handle_event_search(user_input)
+            response = self._handle_event_search(user_input_english)
             self.awaiting_random_confirmation = False
         elif intent == 'more_results':
             response = self._handle_more_results()
             self.awaiting_random_confirmation = False
         elif intent == 'get_details':
-            response = self._handle_event_details(user_input)
+            response = self._handle_event_details(user_input_english)
             self.awaiting_random_confirmation = False
         else:
-            response = self._handle_unknown(user_input)
+            response = self._handle_unknown(user_input_english)
             self.awaiting_random_confirmation = False
 
         # If there's a greeting and another intent, prepend short greeting
@@ -117,13 +121,13 @@ class ConversationManager:
         # Check if specific language was mentioned
         if 'english' in user_lower:
             self.translator.set_language('english')
-            return f"Language set to English. Type 'language' anytime to change."
+            return "Language set to English. You can now type in English. Type 'language' anytime to change."
         elif 'chinese' in user_lower or 'mandarin' in user_lower or '中文' in user_input:
             self.translator.set_language('chinese')
-            return "语言已设置为中文。随时输入 'language' 以更改。"
+            return "语言已设置为中文。您现在可以用中文输入。随时输入 'language' 以更改。"
         elif 'french' in user_lower or 'français' in user_lower:
             self.translator.set_language('french')
-            return "Langue définie sur le français. Tapez 'language' à tout moment pour changer."
+            return "Langue définie sur le français. Vous pouvez maintenant taper en français. Tapez 'language' à tout moment pour changer."
         else:
             # Show language menu
             return self.translator.get_language_menu()
@@ -751,9 +755,10 @@ class ConversationManager:
             missing.append('some keywords/topics')
         return missing
 
-    def _build_missing_prompt(self, _missing):
+    def _build_missing_prompt(self, missing):
         """Return a prioritized prompt for the most useful missing filter"""
         # Disabled: Don't prompt users for missing fields
+        # The 'missing' parameter is kept for potential future use
         return None
 
     def _build_followup_prompt(self):

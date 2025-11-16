@@ -78,23 +78,40 @@ class TranslationService:
             print(f"Translation error: {e}")
             return text
 
+    def translate_to_english(self, text):
+        """
+        Translate user input from current language to English for processing
+
+        Args:
+            text: User input text in any language
+
+        Returns:
+            str: Translated text in English, or original if translation fails
+        """
+        # If English or translation disabled, return as-is
+        if self.current_language == 'en' or not self.translator_available:
+            return text
+
+        try:
+            from deep_translator import GoogleTranslator
+
+            # Translate from target language to English
+            translator = GoogleTranslator(source=self.current_language, target='en')
+            result = translator.translate(text)
+            return result
+        except Exception as e:
+            # If translation fails, return original text
+            print(f"Translation error: {e}")
+            return text
+
     def get_language_menu(self):
         """Get the language selection menu"""
-        if self.current_language == 'en':
-            return (
-                "Choose your language / 选择语言 / Choisissez votre langue:\n"
-                "  1. English\n"
-                "  2. 中文 (Chinese - Mandarin)\n"
-                "  3. Français (French)\n\n"
-                "Type: 'language english' or 'language chinese' or 'language french'"
-            )
-        else:
-            # Show menu in current language
-            menu = (
-                "Choose your language / 选择语言 / Choisissez votre langue:\n"
-                "  1. English\n"
-                "  2. 中文 (Chinese - Mandarin)\n"
-                "  3. Français (French)\n\n"
-                "Type: 'language english' or 'language chinese' or 'language french'"
-            )
-            return menu
+        menu = (
+            "Choose your language / 选择语言 / Choisissez votre langue:\n"
+            "  1. English\n"
+            "  2. 中文 (Chinese - Mandarin)\n"
+            "  3. Français (French)\n\n"
+            "Type: 'language english' or 'language chinese' or 'language french'\n"
+            "Once set, you can type your questions in that language!"
+        )
+        return menu
