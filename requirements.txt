@@ -1,8 +1,12 @@
 # Society Scout Dependencies
 # Python 3.8+
 
-# No external dependencies required for basic functionality
-# All modules use Python standard library
+# Translation support (multi-language feature)
+deep-translator>=1.11.4
+
+# Alternative options:
+# googletrans==3.1.0a0  # Has async issues
+# google-cloud-translate>=3.0.0  # Requires API key
 
 # Future dependencies (when implementing advanced features):
 # numpy>=1.21.0

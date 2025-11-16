@@ -55,7 +55,7 @@ def main():
     print("Chatbot: ", end="")
     typing_effect("Hi there! I can help you find events happening at the university.\n         What are you looking for?")
     print()
-    print("(Type 'quit' or 'exit' to end the conversation)")
+    print("(Type 'language' to change language | Type 'quit' or 'exit' to end)")
     print("-" * 60)
     print()
 

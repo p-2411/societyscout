@@ -7,6 +7,7 @@ import re
 from chatbot.memory import ConversationMemory
 from chatbot.rules import ChatbotRules
 from chatbot.fallbacks import FallbackHandler
+from chatbot.translator import TranslationService
 
 class ConversationManager:
     """Manages the conversation flow and state"""
@@ -15,6 +16,7 @@ class ConversationManager:
         self.memory = ConversationMemory()
         self.rules = ChatbotRules()
         self.fallbacks = FallbackHandler()
+        self.translator = TranslationService()
         self.event_db = event_database
         self.state = 'initial'  # initial, searching, awaiting_clarification, awaiting_random_response
         self.last_results = []
@@ -45,6 +47,9 @@ class ConversationManager:
         # Route to appropriate handler
         if intent == 'greeting':
             response = self._handle_greeting()
+            self.awaiting_random_confirmation = False
+        elif intent == 'change_language':
+            response = self._handle_language_change(user_input)
             self.awaiting_random_confirmation = False
         elif intent == 'uncertainty':
             response = self._handle_uncertainty()
@@ -87,6 +92,10 @@ class ConversationManager:
         if has_greeting and intent != 'greeting':
             response = "Hi there! " + response
 
+        # Translate response to current language (if not already in target language)
+        if intent != 'change_language':  # Don't translate language menu
+            response = self.translator.translate(response)
+
         # Store bot response in history
         self.memory.add_to_history('bot', response)
 
@@ -100,6 +109,24 @@ class ConversationManager:
                        "'help' for more tips, or 'more events' if you want additional options.")
         prompt = "What are you looking for today?"
         return f"{intro}\n{suggestions}\n{prompt}"
+
+    def _handle_language_change(self, user_input):
+        """Handle language change request"""
+        user_lower = user_input.lower()
+
+        # Check if specific language was mentioned
+        if 'english' in user_lower:
+            self.translator.set_language('english')
+            return f"Language set to English. Type 'language' anytime to change."
+        elif 'chinese' in user_lower or 'mandarin' in user_lower or '中文' in user_input:
+            self.translator.set_language('chinese')
+            return "语言已设置为中文。随时输入 'language' 以更改。"
+        elif 'french' in user_lower or 'français' in user_lower:
+            self.translator.set_language('french')
+            return "Langue définie sur le français. Tapez 'language' à tout moment pour changer."
+        else:
+            # Show language menu
+            return self.translator.get_language_menu()
 
     def _handle_cancel(self):
         """Handle cancel command"""
@@ -528,6 +555,12 @@ class ConversationManager:
             # Organizer
             if 'organizer' in event:
                 lines.append(f"│     👥 Host: {event['organizer']}")
+
+            # Tags (show first 5 relevant tags)
+            if 'tags' in event and event['tags']:
+                tags_list = event['tags'][:5]  # Limit to first 5 tags
+                tags_text = ", ".join(tags_list)
+                lines.append(f"│     🏷️  Tags: {tags_text}")
 
             lines.append("└" + "─" * 70 + "┘")
             lines.append("")
