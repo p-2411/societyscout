@@ -17,42 +17,42 @@ class ChatbotRules:
     # Known topic keywords (frame-slot approach for topic extraction)
     TOPIC_KEYWORDS = [
         # Technology & Computing
-        'coding', 'programming', 'tech', 'technology', 'computer', 'software', 'hardware',
+        'code', 'coding', 'program', 'programming', 'tech', 'technology', 'computer', 'software', 'hardware',
         'python', 'java', 'javascript', 'web', 'app', 'mobile', 'ai', 'ml', 'data', 'cyber',
         'security', 'blockchain', 'game', 'gaming', 'vr', 'ar', 'cloud', 'database',
         # Design & Creative
         'design', 'graphic', 'ui', 'ux', 'art', 'creative', 'photography', 'video',
-        'animation', 'film', 'music', 'theater', 'performance', 'drawing', 'painting',
+        'animation', 'film', 'music', 'theater', 'performance', 'draw', 'drawing', 'paint', 'painting',
         # Business & Professional
-        'business', 'entrepreneurship', 'startup', 'marketing', 'finance', 'accounting',
-        'consulting', 'leadership', 'management', 'career', 'professional', 'internship',
-        'networking', 'resume', 'interview',
+        'business', 'entrepreneurship', 'startup', 'market', 'marketing', 'finance', 'account', 'accounting',
+        'consult', 'consulting', 'leadership', 'management', 'career', 'professional', 'internship',
+        'network', 'networking', 'resume', 'interview',
         # Academic & Science
-        'research', 'science', 'engineering', 'math', 'physics', 'chemistry', 'biology',
+        'research', 'science', 'engineer', 'engineering', 'math', 'physics', 'chemistry', 'biology',
         'medicine', 'health', 'psychology', 'law', 'history', 'literature', 'language',
         # Social & Cultural
         'culture', 'cultural', 'diversity', 'community', 'volunteer', 'charity', 'social',
         'environment', 'sustainability', 'activism', 'politics', 'debate', 'discussion',
         # Sports & Wellness
         'sport', 'sports', 'fitness', 'yoga', 'wellness', 'mental', 'mindfulness',
-        'meditation', 'dance', 'running', 'soccer', 'basketball', 'volleyball',
+        'meditation', 'dance', 'run', 'running', 'soccer', 'basketball', 'volleyball',
         # Food & Drink
-        'food', 'cooking', 'baking', 'coffee', 'wine', 'dining', 'culinary', 'dumplings',
+        'food', 'cook', 'cooking', 'bake', 'baking', 'coffee', 'wine', 'dine', 'dining', 'culinary', 'dumplings',
         # Outdoor & Activities
-        'outdoor', 'hiking', 'beach', 'picnic', 'nature', 'camping', 'adventure',
-        'motorcycle', 'ride', 'scenic', 'walking', 'swimming',
+        'outdoor', 'hike', 'hiking', 'beach', 'picnic', 'nature', 'camp', 'camping', 'adventure',
+        'motorcycle', 'ride', 'scenic', 'walk', 'walking', 'swim', 'swimming',
         # Event-specific tags
         'party', 'celebration', 'awards', 'graduation', 'year-end', 'festive', 'holiday',
         'bbq', 'fundraiser', 'marathon', 'competition', 'tournament', 'championships',
-        'collaboration', 'teamwork', 'networking',
+        'collaboration', 'teamwork',
         # Gaming & Entertainment
-        'board games', 'tabletop', 'rpg', 'pokemon', 'nintendo', 'gaming',
+        'board games', 'tabletop', 'rpg', 'pokemon', 'nintendo',
         # Academic Support
-        'student', 'study', 'academic', 'exam', 'tutorial', 'session', 'training',
+        'student', 'study', 'academic', 'exam', 'tutorial', 'session', 'train', 'training',
         'revision', 'mock', 'prep', 'gamsat', 'finals',
         # Other relevant topics
         'hackathon', 'showcase', 'exhibition', 'conference', 'panel', 'seminar',
-        'relaxation', 'stress', 'casual', 'free', 'online'
+        'relax', 'relaxation', 'stress', 'casual', 'free', 'online'
     ]
     FILLER_WORDS = [
         # Articles
@@ -201,9 +201,10 @@ class ChatbotRules:
         # Remove punctuation
         text = text.translate(str.maketrans('', '', string.punctuation))
 
-        # Remove filler words and singularize
+        # Remove filler words - keep both original and singularized
         words = text.split()
-        filtered_words = [ChatbotRules.singularize(w) for w in words if w not in ChatbotRules.FILLER_WORDS]
+        original_filtered = [w for w in words if w not in ChatbotRules.FILLER_WORDS]
+        filtered_words = [ChatbotRules.singularize(w) for w in original_filtered]
 
         # Extract filters
         filters = {
@@ -245,21 +246,39 @@ class ChatbotRules:
             filters['location'] = location
 
         # Frame-slot approach: Extract topic keywords that match known topics
+        # Check both original and singularized words to handle -ing forms correctly
         # Only keep words that are either:
         # 1. In our TOPIC_KEYWORDS list (known relevant topics)
         # 2. Longer than 4 characters and not in exclusion lists (potential domain-specific terms)
-        potential_keywords = [w for w in filtered_words
-                             if w not in ChatbotRules.EVENT_TYPES
-                             and w not in ChatbotRules.ORGANIZERS
-                             and w not in ChatbotRules.DATE_WORDS
-                             and w not in ChatbotRules.SEARCH_WORDS
-                             and w not in ChatbotRules.GREETING_WORDS
-                             and not w.isdigit()]
+        potential_keywords_original = [w for w in original_filtered
+                                      if w not in ChatbotRules.EVENT_TYPES
+                                      and w not in ChatbotRules.ORGANIZERS
+                                      and w not in ChatbotRules.DATE_WORDS
+                                      and w not in ChatbotRules.SEARCH_WORDS
+                                      and w not in ChatbotRules.GREETING_WORDS
+                                      and not w.isdigit()]
 
-        # Validate keywords using frame-slot approach
-        filters['keywords'] = [w for w in potential_keywords
-                              if w in ChatbotRules.TOPIC_KEYWORDS  # Known topic
-                              or len(w) >= 5]  # Or longer word (likely specific topic)
+        potential_keywords_singular = [w for w in filtered_words
+                                      if w not in ChatbotRules.EVENT_TYPES
+                                      and w not in ChatbotRules.ORGANIZERS
+                                      and w not in ChatbotRules.DATE_WORDS
+                                      and w not in ChatbotRules.SEARCH_WORDS
+                                      and w not in ChatbotRules.GREETING_WORDS
+                                      and not w.isdigit()]
+
+        # Validate keywords - check both original and singularized forms
+        validated_keywords = []
+        for orig, sing in zip(potential_keywords_original, potential_keywords_singular):
+            # Prefer original if it's in TOPIC_KEYWORDS, otherwise use singularized
+            if orig in ChatbotRules.TOPIC_KEYWORDS:
+                validated_keywords.append(orig)
+            elif sing in ChatbotRules.TOPIC_KEYWORDS:
+                validated_keywords.append(sing)
+            elif len(orig) >= 5 or len(sing) >= 5:
+                # Use singularized for consistency
+                validated_keywords.append(sing)
+
+        filters['keywords'] = validated_keywords
 
         return filters
 
@@ -360,6 +379,12 @@ class ChatbotRules:
 
         if ChatbotRules._contains_filter_tokens(singular_tokens):
             return 'find_event'
+
+        # Check if any topic keywords are present - assume find_event intent
+        # Check both original and singularized tokens to handle -ing words correctly
+        for token in tokens + singular_tokens:
+            if token in ChatbotRules.TOPIC_KEYWORDS:
+                return 'find_event'
 
         # Greeting detection (as fallback if no other intent detected)
         if ChatbotRules.contains_greeting(user_input):

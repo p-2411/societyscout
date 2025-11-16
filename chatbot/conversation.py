@@ -282,7 +282,7 @@ class ConversationManager:
         """Handle event search request"""
         filter_map = self._ingest_filters(user_input=user_input)
 
-        # Check if any meaningful filters were actually extracted (excluding just keywords)
+        # Check if any meaningful filters were actually extracted
         has_structured_filters = any([
             filter_map.get('event_type'),
             filter_map.get('date'),
@@ -290,16 +290,11 @@ class ConversationManager:
             filter_map.get('organizer')
         ])
 
-        # Check if input explicitly mentions events/activities
-        user_lower = user_input.lower()
-        mentions_events = any(word in user_lower for word in ['event', 'events', 'activity', 'activities'])
-
-        # Only proceed with search if we have structured filters OR
-        # (have keywords AND user explicitly mentioned events)
-        if not has_structured_filters:
-            if not (filter_map.get('keywords') and mentions_events):
-                # No meaningful search criteria, treat as unknown
-                return self._handle_unknown(user_input)
+        # Proceed with search if we have structured filters OR keywords
+        # (intent detection already confirmed this is a find_event request)
+        if not has_structured_filters and not filter_map.get('keywords'):
+            # No meaningful search criteria at all, treat as unknown
+            return self._handle_unknown(user_input)
 
         return self._respond_with_current_filters(filter_map)
 
@@ -465,14 +460,19 @@ class ConversationManager:
         return results
 
     def _handle_no_results(self, filter_map, ack=None, missing_line=None, followup_line=None):
-        """Handle scenario when no events match the search"""
+        """Handle scenario when no events match the search - relax filters one at a time"""
         removed = []
 
+        # Try relaxing filters one at a time, searching after each relaxation
         while self.memory.get_filters():
+            # Remove one filter (most recently added)
             last_filter = self.memory.remove_last_filter()
             removed.append(last_filter)
+
+            # Search with the relaxed filters (this filter removed, others still active)
             similar_results = self._search_events()
 
+            # If we found results with this relaxation, return them immediately
             if similar_results:
                 header = self._build_results_header(filter_map, removed)
                 visible = similar_results[:3]
@@ -480,6 +480,7 @@ class ConversationManager:
                 self.last_removed_filters = removed.copy()
                 self.results_pointer = min(3, len(similar_results))
 
+                # Restore all filters to memory for user's next search
                 for item in reversed(removed):
                     self.memory.add_filter(item['type'], item['value'])
 
@@ -497,6 +498,9 @@ class ConversationManager:
 
                 return "\n\n".join(parts)
 
+            # No results with this relaxation, continue to next filter
+
+        # No results found even after relaxing all filters - use fallback
         for item in reversed(removed):
             self.memory.add_filter(item['type'], item['value'])
 
