@@ -5,6 +5,7 @@ UNSW Event Discovery Chatbot
 
 import sys
 import time
+import select
 from data import EventDatabase
 from chatbot.conversation import ConversationManager
 
@@ -12,6 +13,7 @@ def typing_effect(text):
     """
     Display text with typing animation effect.
     Allocates 3 seconds for every 150 characters.
+    Press Enter to skip the animation.
 
     Args:
         text: The text to display
@@ -19,22 +21,74 @@ def typing_effect(text):
     if not text:
         return
 
-    # Calculate duration: 3 seconds per 150 characters
-    duration = (len(text) / 150) * 3
+    # Save terminal settings and set to raw mode to prevent visible typing
+    old_settings = None
+    try:
+        if sys.platform != 'win32' and sys.stdin.isatty():
+            import tty
+            import termios
+            old_settings = termios.tcgetattr(sys.stdin)
+            tty.setcbreak(sys.stdin.fileno())
+    except:
+        pass
 
-    # Calculate delay per character to fit within duration
-    delay_per_char = duration / len(text)
+    try:
+        # Calculate duration: 3 seconds per 150 characters
+        duration = (len(text) / 150) * 3
 
-    for char in text:
-        sys.stdout.write(char)
-        sys.stdout.flush()
-        time.sleep(delay_per_char)
+        # Calculate delay per character to fit within duration
+        delay_per_char = duration / len(text)
 
-        # Add extra pause after sentence-ending punctuation
-        if char in '.?':
-            time.sleep(0.3)
+        for i, char in enumerate(text):
+            sys.stdout.write(char)
+            sys.stdout.flush()
 
-    print()  # New line at the end
+            # Check if Enter was pressed (non-blocking)
+            if sys.platform != 'win32':
+                # Unix-like systems (macOS, Linux)
+                if select.select([sys.stdin], [], [], 0)[0]:
+                    # Read the character
+                    ch = sys.stdin.read(1)
+                    # Check if it's Enter (newline or carriage return)
+                    if ch in ['\n', '\r']:
+                        # Enter was pressed, print remaining text immediately
+                        sys.stdout.write(text[i+1:])
+                        sys.stdout.flush()
+                        break
+                    # Ignore other keys
+            else:
+                # Windows systems
+                import msvcrt
+                if msvcrt.kbhit():
+                    key = msvcrt.getch()
+                    if key == b'\r':  # Enter key
+                        # Print remaining text immediately
+                        sys.stdout.write(text[i+1:])
+                        sys.stdout.flush()
+                        # Consume any remaining characters in buffer
+                        while msvcrt.kbhit():
+                            msvcrt.getch()
+                        break
+                    # Ignore other keys
+
+            time.sleep(delay_per_char)
+
+            # Add extra pause after sentence-ending punctuation
+            if char in '.?':
+                time.sleep(0.3)
+
+        print()  # New line at the end
+
+    finally:
+        # Restore terminal settings
+        if old_settings is not None:
+            try:
+                import termios
+                termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+                # Flush any remaining input
+                termios.tcflush(sys.stdin, termios.TCIFLUSH)
+            except:
+                pass
 
 def main():
     """Main function to run the chatbot"""
@@ -56,6 +110,7 @@ def main():
     typing_effect("Hi there! I can help you find events happening at the university.\n         What are you looking for?")
     print()
     print("(Type 'language' to change language | Type 'quit' or 'exit' to end)")
+    print("(Press Enter during responses to skip the typing animation)")
     print("-" * 60)
     print()
 
