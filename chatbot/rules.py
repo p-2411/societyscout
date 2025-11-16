@@ -239,6 +239,26 @@ class ChatbotRules:
             for word in words:
                 if (word.isdigit()):
                     filters['date'] = word + " days"
+        else:
+            # Check for specific calendar date (e.g., "November 16", "11/16")
+            date_extracted = ChatbotRules._extract_calendar_date(text, words)
+            if date_extracted:
+                filters['date'] = date_extracted
+            else:
+                # Check for day of week
+                days_of_week = {
+                    'monday': 'monday', 'mon': 'monday',
+                    'tuesday': 'tuesday', 'tue': 'tuesday', 'tues': 'tuesday',
+                    'wednesday': 'wednesday', 'wed': 'wednesday',
+                    'thursday': 'thursday', 'thu': 'thursday', 'thurs': 'thursday',
+                    'friday': 'friday', 'fri': 'friday',
+                    'saturday': 'saturday', 'sat': 'saturday',
+                    'sunday': 'sunday', 'sun': 'sunday'
+                }
+                for word in words:
+                    if word in days_of_week:
+                        filters['date'] = days_of_week[word]
+                        break
 
         # Extract simple location references
         location = ChatbotRules._extract_location(text)
@@ -416,6 +436,78 @@ class ChatbotRules:
         match = re.search(r'\b(?:in|at)\s+([a-z0-9]+(?:\s+[a-z0-9]+)?)', text)
         if match:
             return match.group(1).strip().split()[0]
+        return None
+
+    @staticmethod
+    def _extract_calendar_date(text, words):
+        """
+        Extract specific calendar dates from text
+        Supports formats like: "November 16", "16 November", "11/16", "16th"
+        Returns date in YYYY-MM-DD format or None
+        """
+        from datetime import datetime
+
+        month_names = {
+            'january': 1, 'jan': 1,
+            'february': 2, 'feb': 2,
+            'march': 3, 'mar': 3,
+            'april': 4, 'apr': 4,
+            'may': 5,
+            'june': 6, 'jun': 6,
+            'july': 7, 'jul': 7,
+            'august': 8, 'aug': 8,
+            'september': 9, 'sep': 9, 'sept': 9,
+            'october': 10, 'oct': 10,
+            'november': 11, 'nov': 11,
+            'december': 12, 'dec': 12
+        }
+
+        current_year = datetime.now().year
+        found_month = None
+        found_day = None
+
+        # Check for month names
+        for word in words:
+            if word in month_names:
+                found_month = month_names[word]
+                break
+
+        # Check for day numbers
+        for word in words:
+            # Remove ordinal suffixes (1st, 2nd, 3rd, 4th, etc.)
+            clean_word = word.rstrip('stndrh')
+            if clean_word.isdigit():
+                num = int(clean_word)
+                if 1 <= num <= 31:
+                    found_day = num
+                    break
+
+        # If we found both month and day, create date
+        if found_month and found_day:
+            try:
+                # Assume current year
+                date_str = f"{current_year}-{found_month:02d}-{found_day:02d}"
+                # Validate the date is valid
+                datetime.strptime(date_str, '%Y-%m-%d')
+                return date_str
+            except ValueError:
+                pass
+
+        # Check for slash format (11/16 or 16/11)
+        slash_pattern = re.search(r'(\d{1,2})/(\d{1,2})', text)
+        if slash_pattern:
+            first = int(slash_pattern.group(1))
+            second = int(slash_pattern.group(2))
+
+            # Try month/day format first (American style)
+            if 1 <= first <= 12 and 1 <= second <= 31:
+                try:
+                    date_str = f"{current_year}-{first:02d}-{second:02d}"
+                    datetime.strptime(date_str, '%Y-%m-%d')
+                    return date_str
+                except ValueError:
+                    pass
+
         return None
 
     @staticmethod

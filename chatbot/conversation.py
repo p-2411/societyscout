@@ -768,6 +768,26 @@ class ConversationManager:
 
     @staticmethod
     def _humanize_value(value):
+        """Convert filter values to human-readable format"""
+        from datetime import datetime
+
+        # Check if it's an ISO date (YYYY-MM-DD)
+        try:
+            date_obj = datetime.strptime(value, '%Y-%m-%d')
+            # Format as "Month Day" or "Month Day, Year" if not current year
+            current_year = datetime.now().year
+            if date_obj.year == current_year:
+                return date_obj.strftime('%B %d')  # "November 16"
+            else:
+                return date_obj.strftime('%B %d, %Y')  # "November 16, 2025"
+        except (ValueError, TypeError):
+            pass
+
+        # Check if it's a day of week
+        if value in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
+            return value.capitalize()
+
+        # Default: replace underscores with spaces
         return value.replace('_', ' ')
 
     @staticmethod

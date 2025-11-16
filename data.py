@@ -85,8 +85,25 @@ class EventDatabase:
             end_date = today + timedelta(days=14)
             return [e for e in events
                     if start_date <= datetime.fromisoformat(e['date']).date() <= end_date]
+        elif date_value in ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']:
+            # Find next occurrence of this day of week
+            day_names = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+            target_weekday = day_names.index(date_value)
+            current_weekday = today.weekday()
+
+            # Calculate days until target weekday
+            days_ahead = (target_weekday - current_weekday) % 7
+            if days_ahead == 0:
+                days_ahead = 7  # If it's the same day, get next week's occurrence
+
+            target_date = today + timedelta(days=days_ahead)
         else:
-            return events
+            # Check if it's a specific calendar date in YYYY-MM-DD format
+            try:
+                target_date = datetime.strptime(date_value, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                # Not a valid date format, return all events
+                return events
 
         # Filter for specific date
         return [e for e in events
