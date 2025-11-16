@@ -8,8 +8,8 @@ import string
 class ChatbotRules:
     """Handles rule-based conversation logic"""
 
-    # Keywords for different filter types
-    EVENT_TYPES = ['workshop', 'meetup', 'lecture', 'seminar', 'party', 'social', 'networking']
+    # Keywords for different filter types (only include types that exist in the database)
+    EVENT_TYPES = ['workshop', 'meetup', 'seminar', 'social']
     ORGANIZERS = ['arc', 'library', 'club', 'clubs', 'founders', 'makerspace', 'unsw']
     HELP_KEYWORDS = ['help', 'assist', 'assistance', 'support', 'guidance', 'how', 'info']
     GREETING_WORDS = ['hi', 'hello', 'hey', 'greetings', 'good', 'morning', 'afternoon', 'evening']

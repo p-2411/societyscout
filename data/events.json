@@ -198,7 +198,7 @@
         "location": "Webster Theatre A",
         "organizer": "club",
         "club_name": "UNSW Debating Society",
-        "tags": ["debate", "public speaking", "competition", "social"],
+        "tags": ["debate", "public speaking", "competition", "social", "network"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -249,7 +249,7 @@
         "location": "Village Green, beside Homeground, UNSW",
         "organizer": "club",
         "club_name": "EWB UNSW (Engineers Without Borders)",
-        "tags": ["bbq", "free food", "social", "sausage sizzle", "community"],
+        "tags": ["bbq", "free food", "social", "sausage sizzle", "community", "network"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -334,7 +334,7 @@
         "location": "Library Lawn (covered walkway), Kensington",
         "organizer": "club",
         "club_name": "UNSW Student Society",
-        "tags": ["coffee", "free", "social", "end of term", "celebration"],
+        "tags": ["coffee", "free", "social", "end of term", "celebration", "network"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -351,7 +351,7 @@
         "location": "Butcher's Buffet Strathfield (11 Parnell St, Strathfield)",
         "organizer": "club",
         "club_name": "MotoSoc",
-        "tags": ["dinner", "kbbq", "social", "buffet", "motorcycle community"],
+        "tags": ["dinner", "kbbq", "social", "buffet", "motorcycle community", "network"],
         "registration_link": null,
         "capacity": null,
         "cost": "$52.34"
@@ -385,7 +385,7 @@
         "location": "Colombo Foyer B16, UNSW",
         "organizer": "club",
         "club_name": "TACsoc (Tea and Coffee Society)",
-        "tags": ["tea", "coffee", "social", "taste", "beverage", "bottomless"],
+        "tags": ["tea", "coffee", "social", "taste", "beverage", "bottomless", "network"],
         "registration_link": null,
         "capacity": null,
         "cost": "members free"
@@ -402,7 +402,7 @@
         "location": "Library Lawn (covered walkway), Kensington",
         "organizer": "club",
         "club_name": "UNSW Student Society",
-        "tags": ["coffee", "free", "social", "end of term", "celebration"],
+        "tags": ["coffee", "free", "social", "end of term", "celebration", "network"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
@@ -555,7 +555,7 @@
         "location": "Village Green BBQ, UNSW",
         "organizer": "club",
         "club_name": "KEEBSOC (Mechanical Keyboards Society)",
-        "tags": ["bbq", "keyboard", "mechanical keyboard", "free food", "social", "tech"],
+        "tags": ["bbq", "keyboard", "mechanical keyboard", "free food", "social", "tech", "network"],
         "registration_link": null,
         "capacity": null,
         "cost": "free"
